@@ -1,9 +1,17 @@
+# Copyright 2026 MicroEJ Corp. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be found with this software.
+
+# Build: 7E4D1F7C
+
 IF(NOT DEFINED FPU)
     SET(FPU "-mfloat-abi=hard -mfpu=fpv5-d16")
 ENDIF()
 
+# Use the full newlib instead of newlib-nano: newlib-nano's memmove()/memcpy() use byte-wise
+# transfers, which roughly halves System.arraycopy() throughput on this Cortex-M7. The full
+# newlib uses word-wide LDMIA/STMIA transfers. See also src/bsp/fast_memmove.c.
 IF(NOT DEFINED SPECS)
-    SET(SPECS "--specs=nano.specs --specs=nosys.specs")
+    SET(SPECS "--specs=nosys.specs")
 ENDIF()
 
 IF(NOT DEFINED DEBUG_CONSOLE_CONFIG)
@@ -32,6 +40,14 @@ ENDIF()
 
 IF(ENABLE_SYSTEM_VIEW)
     SET(SYSTEM_VIEW_C_FLAGS "-DENABLE_SYSTEM_VIEW=1")
+ENDIF()
+
+IF(ENABLE_LPUART7)
+    SET(ENABLE_LPUART7_C_FLAGS "-DENABLE_LPUART7=1")
+ENDIF()
+
+IF(RUN_MICROEJ_CORE_VALIDATION)
+    SET(MICROEJ_CORE_VALIDATION_C_FLAGS "-DRUN_MICROEJ_CORE_VALIDATION")
 ENDIF()
 
 SET(MICROUI_VGLITE_FLAGS "-DVG_DRIVER_SINGLE_THREAD")
@@ -114,6 +130,12 @@ SET(C_COMMON_FLAGS_FLEXSPI_NOR_SDRAM " \
     -DSYSTICKS_EVENTS_DISABLE \
     -DENABLE_ETHERNET_1G \
     ${MIMXRT1170_EVKB_FLAG} \
+    -DDEBUG_CONSOLE_TRANSFER_NON_BLOCKING=1 \
+    -DHAL_UART_DMA_ENABLE=1 \
+    -DHAL_UART_DMA_INIT_ENABLE=0 \
+    -DHAL_UART_DMA_RING_BUFFER_ENABLE=1 \
+    ${ENABLE_LPUART7_C_FLAGS} \
+    ${MICROEJ_CORE_VALIDATION_C_FLAGS} \
 ")
 SET(CMAKE_C_FLAGS_FLEXSPI_NOR_SDRAM_DEBUG " \
     ${CMAKE_C_FLAGS_FLEXSPI_NOR_SDRAM_DEBUG} \

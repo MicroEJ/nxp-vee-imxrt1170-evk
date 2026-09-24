@@ -1,6 +1,6 @@
 rootProject.name = "nxpvee-mimxrt1170-evk"
 include("vee-port", "vee-port:front-panel", "vee-port:mock", "vee-port:image-generator")
-include("apps:aiSample", "apps:animatedMascot", "apps:simpleGFX", "apps:HelloWorld")
+include("apps:aiSample", "apps:animatedMascot", "apps:simpleGFX", "apps:HelloWorld", "apps:serialSample")
 
 project(":vee-port:front-panel").projectDir = file("vee-port/extensions/front-panel")
 project(":vee-port:mock").projectDir = file("vee-port/mock")
@@ -14,6 +14,7 @@ include("vee-port:validation:fs")
 include("vee-port:validation:gpio")
 include("vee-port:validation:net")
 include("vee-port:validation:security")
+include("vee-port:validation:serial")
 include("vee-port:validation:ssl")
 include("vee-port:validation:ui")
 include("vee-port:validation:vg")

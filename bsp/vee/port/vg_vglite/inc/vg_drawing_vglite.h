@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2025 MicroEJ Corp. All rights reserved.
+ * Copyright 2023-2026 MicroEJ Corp.
  * Use of this source code is governed by a BSD-style license that can be found with this software.
  */
 
@@ -15,7 +15,7 @@ extern "C" {
  * These are implementations over VGLite and the destination buffer format is the
  * format specified in the VEE port.
  * @author MicroEJ Developer Team
- * @version 9.0.1
+ * @version 10.0.1
  * @see ui_drawing_vglite.h
  */
 

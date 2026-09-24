@@ -1,7 +1,7 @@
 /*
  * C
  *
- * Copyright 2020-2024 MicroEJ Corp. All rights reserved.
+ * Copyright 2020-2025 MicroEJ Corp.
  * Use of this source code is governed by a BSD-style license that can be found with this software.
  */
 
@@ -9,7 +9,7 @@
  * @file
  * @brief MicroEJ MicroUI library low level API: implementation over VGLite
  * @author MicroEJ Developer Team
- * @version 10.0.0
+ * @version 11.0.0
  */
 
 #if !defined MEJ_MATH_H

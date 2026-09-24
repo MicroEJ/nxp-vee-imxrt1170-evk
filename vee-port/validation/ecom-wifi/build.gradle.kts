@@ -22,7 +22,6 @@ testing {
             dependencies {
                 implementation(project())
                 implementation(libs.junit)
-                implementation(libs.junit.platform)
 
                 implementation(libs.testsuite.ecom.wifi)
                 implementation(libs.api.ecom.wifi)

@@ -1,0 +1,189 @@
+diff --git a/include/freetype/config/ftmodule.h b/include/freetype/config/ftmodule.h
+index b315baba8..f9edb3d78 100644
+--- a/include/freetype/config/ftmodule.h
++++ b/include/freetype/config/ftmodule.h
+@@ -8,26 +8,41 @@
+  * Please read `docs/INSTALL.ANY` and `docs/CUSTOMIZE` how to compile
+  * FreeType without GNU make.
+  *
++ * Copyright 2021-2026 MicroEJ Corp. This file has been modified and/or created by MicroEJ Corp.
++ *
++ * This file is part of the FreeType project, and may only be used,
++ * modified, and distributed under the terms of the FreeType project
++ * license, LICENSE.TXT.  By continuing to use, modify, or distribute
++ * this file you indicate that you have read the license and
++ * understand and accept it fully.
+  */
+ 
++#include "vg_configuration.h"
++
++#if defined (VG_FEATURE_FONT)
++
+ FT_USE_MODULE( FT_Module_Class, autofit_module_class )
++FT_USE_MODULE( FT_Module_Class, pshinter_module_class )
++FT_USE_MODULE( FT_Module_Class, sfnt_module_class )
++
++
++#if defined(VG_FEATURE_FONT) && defined (VG_FEATURE_FONT_FREETYPE_VECTOR) && (VG_FEATURE_FONT == VG_FEATURE_FONT_FREETYPE_VECTOR)
++FT_USE_MODULE( FT_Renderer_Class, ft_microvg_renderer_class )
++#endif // defined (VG_FEATURE_FONT_FREETYPE_VECTOR) && (VG_FEATURE_FONT == VG_FEATURE_FONT_FREETYPE_VECTOR)
++
++#if defined(VG_FEATURE_FONT) && defined (VG_FEATURE_FONT_FREETYPE_BITMAP) && (VG_FEATURE_FONT == VG_FEATURE_FONT_FREETYPE_BITMAP)
++FT_USE_MODULE( FT_Renderer_Class, ft_smooth_renderer_class )
++#endif // defined (VG_FEATURE_FONT_FREETYPE_BITMAP) && (VG_FEATURE_FONT == VG_FEATURE_FONT_FREETYPE_BITMAP)
++
++#if defined VG_FEATURE_FREETYPE_TTF && (VG_FEATURE_FREETYPE_TTF == 1)
+ FT_USE_MODULE( FT_Driver_ClassRec, tt_driver_class )
+-FT_USE_MODULE( FT_Driver_ClassRec, t1_driver_class )
++#endif // VG_FEATURE_FREETYPE_TTF
++
++#if defined VG_FEATURE_FREETYPE_OTF && (VG_FEATURE_FREETYPE_OTF == 1)
+ FT_USE_MODULE( FT_Driver_ClassRec, cff_driver_class )
+-FT_USE_MODULE( FT_Driver_ClassRec, t1cid_driver_class )
+-FT_USE_MODULE( FT_Driver_ClassRec, pfr_driver_class )
+-FT_USE_MODULE( FT_Driver_ClassRec, t42_driver_class )
+-FT_USE_MODULE( FT_Driver_ClassRec, winfnt_driver_class )
+-FT_USE_MODULE( FT_Driver_ClassRec, pcf_driver_class )
+-FT_USE_MODULE( FT_Driver_ClassRec, bdf_driver_class )
+ FT_USE_MODULE( FT_Module_Class, psaux_module_class )
+ FT_USE_MODULE( FT_Module_Class, psnames_module_class )
+-FT_USE_MODULE( FT_Module_Class, pshinter_module_class )
+-FT_USE_MODULE( FT_Module_Class, sfnt_module_class )
+-FT_USE_MODULE( FT_Renderer_Class, ft_smooth_renderer_class )
+-FT_USE_MODULE( FT_Renderer_Class, ft_raster1_renderer_class )
+-FT_USE_MODULE( FT_Renderer_Class, ft_sdf_renderer_class )
+-FT_USE_MODULE( FT_Renderer_Class, ft_bitmap_sdf_renderer_class )
+-FT_USE_MODULE( FT_Renderer_Class, ft_svg_renderer_class )
++#endif // VG_FEATURE_FREETYPE_OTF
+ 
++#endif // defined (VG_FEATURE_FONT)
+ /* EOF */
+diff --git a/include/freetype/config/ftoption.h b/include/freetype/config/ftoption.h
+index eb4e32d80..6261cf276 100644
+--- a/include/freetype/config/ftoption.h
++++ b/include/freetype/config/ftoption.h
+@@ -7,6 +7,8 @@
+  * Copyright (C) 1996-2024 by
+  * David Turner, Robert Wilhelm, and Werner Lemberg.
+  *
++ * Copyright 2021-2026 MicroEJ Corp. This file has been modified and/or created by MicroEJ Corp.
++ *
+  * This file is part of the FreeType project, and may only be used,
+  * modified, and distributed under the terms of the FreeType project
+  * license, LICENSE.TXT.  By continuing to use, modify, or distribute
+@@ -15,13 +17,15 @@
+  *
+  */
+ 
+-
+ #ifndef FTOPTION_H_
+ #define FTOPTION_H_
+ 
+ 
+ #include <ft2build.h>
+ 
++#ifdef FT2_BUILD_LIBRARY
++#include "vg_configuration.h"
++#endif
+ 
+ FT_BEGIN_HEADER
+ 
+@@ -180,7 +184,7 @@ FT_BEGIN_HEADER
+    *
+    *   Define this macro if you want to enable this 'feature'.
+    */
+-#define FT_CONFIG_OPTION_USE_LZW
++//#define FT_CONFIG_OPTION_USE_LZW
+ 
+ 
+   /**************************************************************************
+@@ -195,7 +199,7 @@ FT_BEGIN_HEADER
+    *   Define this macro if you want to enable this 'feature'.  See also the
+    *   macro `FT_CONFIG_OPTION_SYSTEM_ZLIB` below.
+    */
+-#define FT_CONFIG_OPTION_USE_ZLIB
++//#define FT_CONFIG_OPTION_USE_ZLIB
+ 
+ 
+   /**************************************************************************
+@@ -348,7 +352,7 @@ FT_BEGIN_HEADER
+    *   in your 'psnames' module.  The Type~1 driver will not be able to
+    *   synthesize a Unicode charmap out of the glyphs found in the fonts.
+    */
+-#define FT_CONFIG_OPTION_ADOBE_GLYPH_LIST
++//#define FT_CONFIG_OPTION_ADOBE_GLYPH_LIST
+ 
+ 
+   /**************************************************************************
+@@ -361,7 +365,7 @@ FT_BEGIN_HEADER
+    *
+    *   Note that the 'FOND' resource isn't checked.
+    */
+-#define FT_CONFIG_OPTION_MAC_FONTS
++//#define FT_CONFIG_OPTION_MAC_FONTS
+ 
+ 
+   /**************************************************************************
+@@ -393,7 +397,7 @@ FT_BEGIN_HEADER
+    * incrementally as the document is parsed, such as the Ghostscript
+    * interpreter for the PostScript language.
+    */
+-#define FT_CONFIG_OPTION_INCREMENTAL
++//#define FT_CONFIG_OPTION_INCREMENTAL
+ 
+ 
+   /**************************************************************************
+@@ -538,7 +542,7 @@ FT_BEGIN_HEADER
+    *
+    *   More details on the hooks can be found in file `otsvg.h`.
+    */
+-#define FT_CONFIG_OPTION_SVG
++//#define FT_CONFIG_OPTION_SVG
+ 
+ 
+   /**************************************************************************
+@@ -569,7 +573,7 @@ FT_BEGIN_HEADER
+    * embedded bitmaps in all formats using the 'sfnt' module (namely
+    * TrueType~& OpenType).
+    */
+-#define TT_CONFIG_OPTION_EMBEDDED_BITMAPS
++//#define TT_CONFIG_OPTION_EMBEDDED_BITMAPS
+ 
+ 
+   /**************************************************************************
+@@ -578,7 +582,9 @@ FT_BEGIN_HEADER
+    * outlines (from the 'COLR'/'CPAL' tables) in all formats using the 'sfnt'
+    * module (namely TrueType~& OpenType).
+    */
++#ifdef VG_FEATURE_FREETYPE_COLORED_EMOJI
+ #define TT_CONFIG_OPTION_COLOR_LAYERS
++#endif
+ 
+ 
+   /**************************************************************************
+@@ -607,7 +613,7 @@ FT_BEGIN_HEADER
+    * Accessing SFNT names is done through the functions declared in
+    * `ftsnames.h`.
+    */
+-#define TT_CONFIG_OPTION_SFNT_NAMES
++//#define TT_CONFIG_OPTION_SFNT_NAMES
+ 
+ 
+   /**************************************************************************
+@@ -736,7 +742,7 @@ FT_BEGIN_HEADER
+    * Define `TT_CONFIG_OPTION_BDF` if you want to include support for an
+    * embedded 'BDF~' table within SFNT-based bitmap formats.
+    */
+-#define TT_CONFIG_OPTION_BDF
++//#define TT_CONFIG_OPTION_BDF
+ 
+ 
+   /**************************************************************************
+@@ -972,6 +978,7 @@ FT_BEGIN_HEADER
+    */
+ #ifdef TT_CONFIG_OPTION_BYTECODE_INTERPRETER
+ #define  TT_USE_BYTECODE_INTERPRETER
++
+ #ifdef TT_CONFIG_OPTION_SUBPIXEL_HINTING
+ #define  TT_SUPPORT_SUBPIXEL_HINTING_MINIMAL
+ #endif

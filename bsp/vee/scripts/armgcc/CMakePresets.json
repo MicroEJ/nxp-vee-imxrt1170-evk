@@ -24,7 +24,9 @@
         "JLINK_MEM_LOCATION": "0x30000400",
         "ENABLE_AI": "1",
         "ENABLE_SYSTEM_VIEW": "0",
-        "ENABLE_WIFI": "0"
+        "ENABLE_WIFI": "0",
+        "ENABLE_LPUART7": "0",
+        "RUN_MICROEJ_CORE_VALIDATION": "0"
       }
     },
     {

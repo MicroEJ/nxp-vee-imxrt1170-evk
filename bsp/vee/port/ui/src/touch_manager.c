@@ -26,8 +26,6 @@
 
 #include "touch_helper.h"
 
-#include "mej_log.h"
-
 // RTOS
 #include "FreeRTOS.h"
 #include "semphr.h"

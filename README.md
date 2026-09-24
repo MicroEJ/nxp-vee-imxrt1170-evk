@@ -1,149 +1,65 @@
-# NXP Application Code Hub
-[<img src="https://mcuxpresso.nxp.com/static/icon/nxp-logo-color.svg" width="100"/>](https://www.nxp.com)
+![SDK](https://shields.microej.com/endpoint?url=https://repository.microej.com/packages/badges/sdk_6.0.json)
+![ARCH](https://shields.microej.com/endpoint?url=https://repository.microej.com/packages/badges/arch_8.6.json)
 
-## NXP Platform Accelerator for i.MX RT1170 Evaluation Kit
+# MicroEJ VEE Port for NXP i.MX RT1170 Evaluation Kit
 
-NXP Platform Accelerator is a VEE (Virtual Execution Environment) that provides a hardware abstraction to develop applications in high-level programming languages such as Java.
+This project is used to build a MicroEJ VEE Port for [i.MX RT1170 Evaluation Kit](https://www.nxp.com/design/design-center/development-boards-and-designs/i-mx-evaluation-and-development-boards/i-mx-rt1170-evaluation-kit:MIMXRT1170-EVKB).
 
-NXP Platform Accelerator is built upon [MicroEJ technology](https://www.microej.com/product/vee/).
+## Related Files
 
-#### Boards: MIMXRT1170-EVK, MIMXRT1170-EVKB
-#### Categories: RTOS
-#### Peripherals: DISPLAY
+This directory contains:
+
+* [CHANGELOG](./CHANGELOG.md) to track the changes in the VEE Port
+* [RELEASE NOTES](./RELEASE_NOTES.md) to list:
+
+    - the versions of the VEE Port, of its dependencies and of the BSP,
+    - the features provided by each Foundation Library pack,
+    - the known issues and the limitations,
+    - the memory layout of the VEE Port.
+* [LICENSE](./LICENSE.txt) and [NOTICE](./NOTICE.txt) to describe the license terms of the VEE Port and of its third-party components
 
 ## Table of Contents
-- [Software](#software)
-- [Hardware](#hardware)
-- [Setup](#setup)
+
+- [VEE Port Specifications](#vee-port-specifications)
+- [Fetch the Source Code](#fetch-the-source-code)
+- [Requirements](#requirements)
+- [Run an Application on the Simulator](#run-an-application-on-the-simulator)
+- [Run an Application on the Board](#run-an-application-on-the-board)
+- [Optional Features](#optional-features)
 - [Troubleshooting](#troubleshooting)
-- [Support](#support)
-- [Release Notes](#release-notes)
 
-## Software
+## VEE Port Specifications
 
-* Linux (Ubuntu 22.04/Debian 11) or Windows 10
-* Java Development Kit (Oracle JDK 11 or OpenJDK 11)
-* MICROEJ SDK 6
-* MCUXpresso SDK Developer (installs CMake, Ninja, West, LinkServer and ARM GNU Toolchain)
-
-## Hardware
-
-This project uses the following:
-
-* [i.MX RT1170 Evaluation Kit](https://www.nxp.com/design/design-center/development-boards-and-designs/i-mx-evaluation-and-development-boards/i-mx-rt1170-evaluation-kit:MIMXRT1170-EVKB)
-* [RK055HDMIPI4MA0](https://www.nxp.com/part/RK055HDMIPI4MA0#/) 5.5" LCD Panel
-
-## Setup
-
-<p float="left">
-  <img src="Documentation/pictures/RT1170/evkbmimxrt1170.jpg" width="300" />
-  <img src="Documentation/pictures/RT1170/rk055hdmipi4ma0.jpg" width="300" /> 
-</p>
-
-### Board Technical Specifications
-
-|                         |               |
-| ----------------------- | ------------- |
-|MCU part number          |MIMXRT1170     |
-|MCU architecture         |Arm Cortex-M7  |
-|MCU max clock frequency  |1 GHz          |
-|Internal RAM size        |1MB - 2MB      |
-|External RAM size        |64MB           |
-|Internal flash size      |-              |
-|External flash size      |16MB           |
-|eMMC/SD support          |yes            |
-|Display                  |1280x720 MIPI  |
-|GPU                      |2D GPU with vector graphics acceleration|
-|Ethernet interface       |100Mbit / 1Gbit|
-|WiFi interface           |via extension board|
-
-### VEE Port Specifications
-
-The architecture version is `8.3.0`.
+The architecture version is `8.6.0`.
 
 This VEE Port provides the following Foundation Libraries:
 
-|Foundation Library|Version|
-|------------------|-------|
-|BON               |1.4    |
-|DEVICE            |1.2    |
-|DRAWING           |1.0    |
-|EDC               |1.3    |
-|FS                |2.1    |
-|KF                |1.7    |
-|MICROUI           |3.5    |
-|MICROVG           |1.4    |
-|NET               |1.1    |
-|SECURITY          |1.7    |
-|SNI               |1.4    |
-|SSL               |2.2    |
-|TRACE             |1.1    |
+|Foundation Library| Version |
+|------------------|---------|
+|BON               | 1.5     |
+|DEVICE            | 1.2     |
+|DRAWING           | 1.0     |
+|ECOM-WIFI         | 2.3     |
+|EDC               | 1.3     |
+|EVENT             | 3.0     |
+|FS                | 2.1     |
+|GPIO              | 1.0     |
+|KF                | 1.7     |
+|MICROAI           | 2.3     |
+|MICROUI           | 3.6     |
+|MICROVG           | 1.5     |
+|NET               | 1.1     |
+|SECURITY          | 1.7     |
+|SERIAL            | 3.0     |
+|SNI               | 1.4     |
+|SSL               | 2.2     |
+|TRACE             | 1.1     |
 
 This VEE Port is compatible with MicroEJ SDK6 or higher.
 
-## Requirements
-
-* A PC with Windows 10 or higher or Linux (tested on Debian 11),
-  * Note for Mac users: this documentation does not cover MacOS use; however, it is supported by the MicroEJ tools. If you are interested in Mac support, please [contact MicroEJ](https://www.microej.com/contact/#form_2).
-* An internet connection to use the [MicroEJ Central Repository](https://developer.microej.com/central-repository/),
-* An i.MX RT1170 Evaluation Kit board (can be ordered [here](https://www.nxp.com/design/design-center/development-boards-and-designs/i-mx-evaluation-and-development-boards/i-mx-rt1170-evaluation-kit:MIMXRT1170-EVKB)) and RK055HDMIPI4MA0 display panel (can be ordered [here](https://www.nxp.com/part/RK055HDMIPI4MA0#/))
-* Optionally: a J-Link Debugger probe to flash the software.
-* Optionally: a MicroSD card to use the file system
-
-## Steps
-
-### Get MicroEJ SDK
-
-The MICROEJ SDK allows to build the VEE Port and the high-level applications.
-It can be used to run the i.MX RT1170 Evaluation Kit simulator.
-
-* Install a Java Development Kit (JDK). The MICROEJ SDK requires a JDK (Java Development Kit) 11 or higher.
-  You can download a JDK at [Java SE 11](https://www.oracle.com/java/technologies/downloads/#java11).
-* Install MICROEJ SDK 6 by following the [SDK 6 Installation Documentation](https://docs.microej.com/en/latest/SDK6UserGuide/install.html).
-  You can use your preferred IDE to work with the MICROEJ SDK.
-
-This release has been tested with a JDK 11 and 17.
-
-### Get the Necessary Tools for MCUXpresso SDK
-
-You can choose to install MCUXpresso SDK tools manually or with the installer tool.
-
-#### With the MCUXpresso Installer Tool
-
-Install the MCUXpresso Installer tool with the following documentation: [link](https://github.com/nxp-mcuxpresso/vscode-for-mcux/wiki/Dependency-Installation).
-
-Open it and install the following tools that are used during compilation/debugging:
-
-* MCUXpresso SDK Developer (installs CMake, Ninja, West, and ARM GNU Toolchain)
-* LinkServer
-* SEGGER J-Link (if optional J-Link is used)
-
-Also, install the following tools manually:
-
-* [Make](https://gnuwin32.sourceforge.net/packages/make.htm), in version 3.81 or higher.
-* On Ubuntu 22.04 or lower, [CMake](https://cmake.org/download/) must be installed manually to get the latest version (3.27 or higher needed).
-
-#### Manual Installation
-
-The MCUXpresso installer tool provides a convenient way to install these tools, but they can also be installed independently.
-In the case of a standalone installation, the following versions need to be installed:
-
-* [CMake](https://cmake.org/download/) version 3.27 or higher
-* [Make](https://gnuwin32.sourceforge.net/packages/make.htm) version 3.81 or higher
-* [ARM GNU Toolchain](https://developer.arm.com/downloads/-/arm-gnu-toolchain-downloads) version 13.2.1 or higher
-* [LinkServer](https://www.nxp.com/design/design-center/software/development-software/mcuxpresso-software-and-tools-/linkserver-for-microcontrollers:LINKERSERVER) version 1.6.133 or higher
-
-#### Environment Variables
-
-Whatever procedure is used for the installation, the following environment variables must be configured:
-
-* ``ARMGCC_DIR``: the installation directory of ARM GNU Toolchain, for example ``C:\Program Files (x86)\Arm GNU Toolchain arm-none-eabi\13.2 Rel1``
-* If you use LinkServer to flash your device, add to ``PATH`` the installation directory of LinkServer, for example ``C:\NXP\LinkServer_24.12.21``.
-
-> Note: On Windows, editing the User variables may not work —Preferably edit System variables.
-
-
 ## Fetch the Source Code
+
+The source code is fetched with [West](https://docs.zephyrproject.org/latest/develop/west/install.html), which must be installed first.
 
 Clone the repository with the following commands:
 
@@ -165,7 +81,17 @@ nxpvee-mimxrt1170-evk
 
 > Note: Your path should not contain a whitespace or special character
 
-## Open the Project
+## Requirements
+
+* A PC with Windows 10 or higher or Linux (tested with Ubuntu 24.04)
+* An internet connection to use the [MicroEJ Central Repository](https://developer.microej.com/central-repository/)
+* MICROEJ SDK 6, installed by following the [SDK 6 Installation Documentation](https://docs.microej.com/en/latest/SDK6UserGuide/install.html)
+
+## Run an Application on the Simulator
+
+To run an application on the Simulator, the BSP and the C toolchain are not required.
+
+### Open the Project
 
 Launch your IDE chosen during MicroEJ installation step and open the project folder (`nxpvee-mimxrt1170-evk`). The following screenshots show Visual Studio Code, but similar results can be obtained with another IDE.
 
@@ -191,18 +117,29 @@ And the Gradle view should look like this:
   <img src="Documentation/pictures/common/sdk_gradle_view.png" width="300" />
 </p>
 
-## Build and Run an Application in Simulation Mode
+The project contains the following subprojects and directories:
 
-### Choose your Demo Application
+- `apps`: Contains the sample applications that use the VEE Port (see [Choose Your Demo Application](#choose-your-demo-application)).
+- `vee-port`: Contains the VEE Port configuration.
+- `vee-port/extensions`: Contains the MicroUI configuration, the Front Panel and Image Generator used by the Simulator.
+- `vee-port/mock`: Contains the mock of the native functions of the sample applications, used by the Simulator.
+- `vee-port/validation`: Contains the testsuites to validate the Abstraction Layers implementation.
+- `bsp/vee/port`: Contains the Abstraction Layers of each Foundation Library.
+- `bsp/vee/src`: Contains the board configuration and the `main` entry point of the BSP.
+- `bsp/vee/scripts`: Contains the build, flash and clean scripts of the BSP.
+- `bsp/mcux-sdk`: Contains the MCUXpresso SDK, fetched by `west update`.
 
-Four MicroEJ applications are included in this release.
+### Choose Your Demo Application
+
+Five MicroEJ applications are included in this release.
 
 * The `HelloWorld` application displays "Hello World" periodically. More details in [this README](apps/HelloWorld/README.md).
 * The `SimpleGFX` application displays three moving rectangles using the [MicroUI API](https://docs.microej.com/en/latest/ApplicationDeveloperGuide/UI/MicroUI/index.html#section-app-microui). The coordinates of the rectangles are calculated in C native functions. More details in [this README](apps/simpleGFX/README.md).
 * The `AnimatedMascot` application draws an animated [Android Vectordrawable](https://developer.android.com/develop/ui/views/graphics/vector-drawable-resources) image. It uses the RT1170's GCNanoLite-V GPU as an accelerator. More details in [this README](apps/animatedMascot/README.md).
-* The `AiSample` Application runs an inference of sample images on a CifarNet quantized TensorFlow Lite model. You can find the AI library API in the [MicroEJ Developer Repository](https://forge.microej.com/ui/native/microej-developer-repository-release/com/nxp/api/ai/). To run this demo, AI must be enabled (see [AI](#ai) paragraph). More details in [this README](apps/aiSample/README.md).
+* The `AiSample` Application runs an inference of sample images on a CifarNet quantized TensorFlow Lite model. You can find the AI library API in the [MicroEJ Developer Repository](https://forge.microej.com/ui/native/microej-developer-repository-release/com/nxp/api/ai/). More details in [this README](apps/aiSample/README.md).
+* The `serialSample` Application demonstrates how to use [Serial](https://docs.microej.com/en/latest/ApplicationDeveloperGuide/serialCommunications.html) library with a simple echo sample.
 
-### Execute runOnSimulator Task
+### Execute `runOnSimulator` Task
 
 To run an application in simulation mode, go to the Gradle view, expand the tasks of the chosen demo project, then double-click on the `microej` > `runOnSimulator` task:
 
@@ -216,9 +153,61 @@ Here is the `AnimatedMascot` application running in simulation:
   <img src="Documentation/pictures/RT1170/sdk_sim_mascot.png" width="300" />
 </p>
 
-The runOnSimulator task also builds the VEE Port declared as dependency if required.
+The `runOnSimulator` task also builds the VEE Port declared as dependency if required.
 
-## Build and Run Applications on your Board
+## Run an Application on the Board
+
+### Hardware Requirements
+
+* An [i.MX RT1170 Evaluation Kit](https://www.nxp.com/design/design-center/development-boards-and-designs/i-mx-evaluation-and-development-boards/i-mx-rt1170-evaluation-kit:MIMXRT1170-EVKB) board
+* An [RK055HDMIPI4MA0](https://www.nxp.com/part/RK055HDMIPI4MA0#/) 5.5" LCD panel
+* Optionally: a J-Link debug probe to flash the software
+* Optionally: a MicroSD card to use the file system
+
+<p float="left">
+  <img src="Documentation/pictures/RT1170/evkbmimxrt1170.jpg" width="300" />
+  <img src="Documentation/pictures/RT1170/rk055hdmipi4ma0.jpg" width="300" /> 
+</p>
+
+### Board Technical Specifications
+
+|                         |               |
+| ----------------------- | ------------- |
+|MCU part number          |MIMXRT1170     |
+|MCU architecture         |Arm Cortex-M7  |
+|MCU max clock frequency  |1 GHz          |
+|Internal RAM size        |1MB - 2MB      |
+|External RAM size        |64MB           |
+|Internal flash size      |-              |
+|External flash size      |16MB           |
+|eMMC/SD support          |yes            |
+|Display                  |1280x720 MIPI  |
+|GPU                      |2D GPU with vector graphics acceleration|
+|Ethernet interface       |100Mbit / 1Gbit|
+|WiFi interface           |via extension board|
+
+### Get the Build Tools
+
+The BSP is built and flashed with the scripts provided in [bsp/vee/scripts](bsp/vee/scripts).
+These scripts need the following tools:
+
+* [CMake](https://cmake.org/download/) version 3.27 or higher
+* [Ninja](https://github.com/ninja-build/ninja/releases)
+* [Make](https://gnuwin32.sourceforge.net/packages/make.htm) version 3.81 or higher
+* [ARM GNU Toolchain](https://developer.arm.com/downloads/-/arm-gnu-toolchain-downloads) version 13.2.Rel1 (version 14 is not supported)
+* [LinkServer](https://www.nxp.com/design/design-center/software/development-software/mcuxpresso-software-and-tools-/linkserver-for-microcontrollers:LINKERSERVER) version 1.6.133 or higher, to flash with the on-board probe
+* [SEGGER J-Link](https://www.segger.com/downloads/jlink/), only to flash with an external J-Link probe
+
+> Note: On Ubuntu 22.04 or lower, the CMake package of the distribution is too old: install CMake from the link above.
+
+#### Environment Variables
+
+The following environment variables must be configured:
+
+* ``ARMGCC_DIR``: the installation directory of ARM GNU Toolchain, for example ``C:\Program Files (x86)\Arm GNU Toolchain arm-none-eabi\13.2 Rel1``
+* If you use LinkServer to flash your device, add to ``PATH`` the installation directory of LinkServer, for example ``C:\NXP\LinkServer_24.12.21``.
+* If you use a J-Link probe on Windows, set ``JLINK_INSTALLATION_DIR`` to the installation directory of SEGGER J-Link, for example ``C:\Program Files\SEGGER\JLink``. On Linux, ``JLinkExe`` must be in ``PATH``.
+* CMake, Ninja and Make must be in ``PATH``.
 
 ### Board Setup
 
@@ -237,7 +226,7 @@ Depending on the revision of your evaluation kit, follow the corresponding hardw
 
 ##### Setup the i.MX RT1170 EVKB
 
-* Check that the dip switches (SW1) are set to OFF, OFF, ON, and OFF.
+* Check that the DIP switches (SW1) are set to OFF, OFF, ON, and OFF.
 * Connect a micro-USB cable to J86 to power the board.
 * You can connect a 5V power supply to J43 if you need to use the display
 
@@ -251,7 +240,7 @@ The COM port uses the following parameters:
 | -------- | -------- | -------- | -------- | -------- |
 | 115200     | 8     | None     | 1     | None     |
 
-##### Debugger options
+##### Debugger Options
 
 The i.MX RT1170 EVKB can either be flashed and connected to a debugger through the USB port J11 or the JTAG connector J1:
 
@@ -262,7 +251,7 @@ The i.MX RT1170 EVKB can either be flashed and connected to a debugger through t
   <img src="Documentation/pictures/RT1170/imxrt1170evkb-setup-debug.jpg" width="300" />
 </p>
 
-Once your setup is done, you can continue this Readme at the [Build and Deploy using MicroEJ SDK 6](#build-and-deploy-using-microej-sdk-6) section.
+Once your setup is done, continue this README at the [Build and Deploy](#build-and-deploy) section.
 
 #### MIMXRT1170-EVK
 
@@ -272,7 +261,7 @@ Once your setup is done, you can continue this Readme at the [Build and Deploy u
 
 ##### Setup the i.MX RT1170 EVK
 
-* Check that the dip switches (SW1) are set to OFF, OFF, ON, and OFF.
+* Check that the DIP switches (SW1) are set to OFF, OFF, ON, and OFF.
 * Connect the micro-USB cable to J11 to power the board.
 * You can connect a 5V power supply to J43 if you need to use the display
 
@@ -286,7 +275,7 @@ The COM port uses the following parameters:
 | -------- | -------- | -------- | -------- | -------- |
 | 115200     | 8     | None     | 1     | None     |
 
-##### Debugger options
+##### Debugger Options
 
 The i.MX RT1170 EVK can either be flashed and connected to a debugger through the USB port J11 or the JTAG connector J1:
 
@@ -297,154 +286,89 @@ The i.MX RT1170 EVK can either be flashed and connected to a debugger through th
   <img src="Documentation/pictures/RT1170/imxrt1170evk-setup-debug.jpg" width="300" />
 </p>
 
-Once your setup is done, you can continue this Readme at the [Build and Deploy using MicroEJ SDK 6](#build-and-deploy-using-microej-sdk-6) section.
+Once your setup is done, continue this README at the [Build and Deploy](#build-and-deploy) section.
+
 ### Build and Deploy
 
-There are two different ways to build and deploy an executable on target:
-
-* Using MicroEJ SDK 6: this method allows to build and deploy an executable in one click using gradle tasks.
-* Using MCUXpresso for VSCode: this method allows to debug on target in addition to build and deploy.
-
-#### Build and Deploy using MicroEJ SDK 6
-
-##### Configure the board
+#### Configure the Board
 
 To configure the board, change the `CHOSEN_BOARD` variable in [set_project_env.bat](bsp/vee/scripts/set_project_env.bat) or [set_project_env.sh](bsp/vee/scripts/set_project_env.sh):
 
 * Set it to `evk` for i.MX RT1170 EVK
 * Set it to `evkb` for i.MX RT1170 EVKB
 
-##### Configure debug or release mode
+#### Configure Debug or Release Mode
 
 To configure the debug or release mode, change the `CHOSEN_MODE` variable in [set_project_env.bat](bsp/vee/scripts/set_project_env.bat) or [set_project_env.sh](bsp/vee/scripts/set_project_env.sh):
 
 * Set it to `0` for debug mode
 * Set it to `1` for release mode
 
-##### Configure the debug probe
+#### Configure the Debug Probe
 
 To configure the debug probe, change the `CHOSEN_PROBE` variable in [set_project_env.bat](bsp/vee/scripts/set_project_env.bat) or [set_project_env.sh](bsp/vee/scripts/set_project_env.sh):
 
 * Set it to `flash` for a J-Link probe
 * Set it to `flash_cmsisdap` for board internal probe
 
-##### Configure the BSP Features
+#### Configure the BSP Features
 
 Compilation flags are located in [CMakePresets.json](bsp/vee/scripts/armgcc/CMakePresets.json).
-To enable any desired features, please edit the file.
+Edit this file to enable or disable features.
 
 For changes in this file to take effect, the script [clean.bat](bsp/vee/scripts/clean.bat) or [clean.sh](bsp/vee/scripts/clean.sh) must be called.
 
-##### Launch `runOnDevice` gradle task
+#### Launch `runOnDevice` Gradle Task
 
 To build and deploy your executable on your board, go to the Gradle view, expand the tasks of the chosen demo project, then double-click on the `microej` > `runOnDevice` task:
 
-If you don't have a MicroEJ license, you will get an error message telling you to get one. Please follow [the instructions from MicroEJ](https://docs.microej.com/en/latest/SDK6UserGuide/licenses.html#evaluation-licenses) to get an evaluation license. To switch to a production license, please get in touch with your NXP representative.
+<p float="left">
+  <img src="Documentation/pictures/common/sdk_run_on_device.png" width="300" />
+</p>
+
+If you don't have a MicroEJ license, you will get an error message telling you to get one. Follow [the instructions from MicroEJ](https://docs.microej.com/en/latest/SDK6UserGuide/licenses.html#evaluation-licenses) to get an evaluation license. To switch to a production license, contact your MicroEJ representative.
 
 This task calls:
 
 * [build.bat](bsp/vee/scripts/build.bat) or [build.sh](bsp/vee/scripts/build.sh) to build the BSP,
 * [run.bat](bsp/vee/scripts/run.bat) or [run.sh](bsp/vee/scripts/run.sh) script to flash the program on the target without opening a debug session.
 
-<p float="left">
-  <img src="Documentation/pictures/common/sdk_run_on_device.png" width="300" />
-</p>
+#### Build and Deploy from the Command Line
 
-#### Build and Deploy using MCUXpresso for VSCode
+The build and flash scripts can be called directly to rebuild the BSP without rebuilding the MicroEJ application.
+This requires the MicroEJ application object files (`microejapp.o` and `microejruntime.a` in `bsp/vee/lib`) to be already generated, by a previous call to the `buildExecutable` or `runOnDevice` Gradle task.
 
-MCUXpresso for VSCode is a plugin on VSCode IDE that builds and deploys firmware on NXP targets. It also provides the configuration to launch a debug session.
+##### Build the Executable
 
-##### Generate MicroEJ Object Files
+The board, the debug or release mode and the probe are selected in [set_project_env.bat](bsp/vee/scripts/set_project_env.bat) or [set_project_env.sh](bsp/vee/scripts/set_project_env.sh), as described in [Build and Deploy](#build-and-deploy).
 
-You need to produce the object files of the MicroEJ Application and deploy them into the BSP, but you will delegate the build of the Executable to MCUXpresso. To do so, follow these steps:
+From the `nxpvee-mimxrt1170-evk` directory, run:
 
-* Open the file `configuration/common.properties` located in your application folder and change the property `deploy.bsp.microejscript` to `false`
-* Open the Gradle view, expand the tasks of your application, and double-click on the `microej` > `buildExecutable` task.
+* On Windows: `bsp\vee\scripts\build.bat`
+* On Linux: `bsp/vee/scripts/build.sh`
 
-The following MicroEJ object files will be deployed in the BSP:
+The executable is copied to the current directory as `application.out`, `application.hex` and `application.bin`.
 
-* The MicroEJ application (`microejapp.o`) will be deployed in `bsp/vee/lib`.
-* The MicroEJ library (`microejruntime.a`) will be deployed in `bsp/vee/lib`.
-* The MicroEJ header files (`*.h`) will be deployed in `bsp/vee/inc`.
+##### Flash the Board
 
-##### Load the Project into VS Code
+From the `nxpvee-mimxrt1170-evk` directory, run:
 
-Open the project with VSCode (from where the .vscode is located).
-Install [MCUXpresso for VSCode](https://www.nxp.com/design/design-center/software/embedded-software/mcuxpresso-for-visual-studio-code:MCUXPRESSO-VSC) plugin.
+* On Windows: `bsp\vee\scripts\run.bat`
+* On Linux: `bsp/vee/scripts/run.sh`
 
-##### Select a Preset
+Once the firmware is flashed, the application starts on the board.
 
-Open the Command Palette (`CTRL + SHIFT + p`) and run `CMake: Select Configure Preset` to select the build mode you wish to use.
+#### MCUXpresso for VS Code
 
-By default, you can select the `flexspi_nor_sdram_debug_evkb` variant.
-
-<p float="left">
-  <img src="Documentation/pictures/common/vscode_select_preset.jpg" width="500" />
-</p>
-
-You can also select a preset by using the Projects section from the "MCUXpresso for VS code" view and setting the appropriate build as default.
-
-<p float="left">
-  <img src="Documentation/pictures/common/vscode_projects_view.jpg" width="500" />
-</p>
-
-##### Configure the Project
-
-Open the Command Palette (`CTRL + SHIFT + p`) and run `CMake: Configure`.
-
-<p float="left">
-  <img src="Documentation/pictures/common/vscode_select_configure.jpg" width="500" />
-</p>
-
-##### Configure the BSP Features
-
-Compilation flags are located in [CMakePresets.json](bsp/vee/scripts/armgcc/CMakePresets.json).
-To enable any desired features, please edit the file (and reload preset & re-configure if needed).
-
-After a change in this file, a Pristine build must be made (see [Build the Project](#build-the-project) step).
-
-##### Build the Project
-
-Open the Command Palette (`CTRL + SHIFT + p`) and run `CMake: Build`.
-
-<p float="left">
-  <img src="Documentation/pictures/common/vscode_select_build.jpg" width="500" />
-</p>
-
-You can connect VS Code to the board using the Serial Link USB or a SEGGER J-Link probe.
-Follow the [Board Setup](#board-setup) step for more information on how to connect the different debuggers.
-
-Debug sessions can be started by pressing the `F5` key.
-
-It is also possible to build and debug the project via the MCUXpresso plugin:
-
-Right-click on the project, then:
-
-* `Build Selected` or `Pristine Build/Rebuild Selected` to compile.
-* `Debug` to debug (it can take some time before launching). In this case, the name of the selected preset must contain `debug` and not `release`.
-
-<p float="left">
-  <img src="Documentation/pictures/common/vscode_mcuxpr_build_debug.jpg" width="300" />
-</p>
-
-Once the firmware is flashed, you should see the application running on the target.
-
-<ins>Note:</ins>
-In case of connection issues to the target, reset the debug probe selection via the MCUXpresso plugin:
-
-* Select the MCUXpresso plugin in the activity bar.
-* Right-click on the project name and select `Reset Probe Selection`.
-* Start the debug again.
-
-<p float="left">
-  <img src="Documentation/pictures/common/vscode_reset_probe_selection.jpg" width="300" />
-</p>
+The [.vscode](.vscode) folder contains a configuration for the [MCUXpresso for VS Code](https://www.nxp.com/design/design-center/software/embedded-software/mcuxpresso-for-visual-studio-code:MCUXPRESSO-VSC) extension.
+It is kept for users who already work with this extension, but its compatibility with new releases of the extension is not guaranteed.
+The build and flash scripts described above are the supported way to build and deploy the executable.
 
 ## Optional Features
 
 ### Multi-Sandbox
 
-For information on multi-sandbox, please visit [MicroEJ website](https://docs.microej.com/en/latest/VEEPortingGuide/multiSandbox.html).
+For information on multi-sandbox, see the [MicroEJ documentation](https://docs.microej.com/en/latest/VEEPortingGuide/multiSandbox.html).
 
 By default, the VEE Port is built in mono-sandbox. Multi-sandbox can be enabled by editing `com.microej.runtime.capability` property of [configuration.properties](vee-port/configuration.properties) file and change its value to `multi`.
 
@@ -454,16 +378,31 @@ AI can be enabled or disabled by changing `ENABLE_AI` value in [CMakePresets.jso
 Set it to 1 to enable it and 0 to disable it.
 Call [clean.bat](bsp/vee/scripts/clean.bat) or [clean.sh](bsp/vee/scripts/clean.sh) after changing this value.
 
+### Serial
+
+The VEE Port is configured so that `LPUART2` is readily available:
+
+* TX: connector `J9`, pin `4`.
+* RX: connector `J9`, pin `2`.
+* GND is available on `J9`, pins {`1`, `5`, `7`, `9`, `11`, `13`, `15`}, see schematics for more information.
+
+It is also possible to use `LPUART7` but at the expense of disabling display support. 
+To do so, set `ENABLE_LPUART7` CMake variable to 1 in [CMakePresets.json](bsp/vee/scripts/armgcc/CMakePresets.json). 
+**It will automatically remove MicroUI and MicroVG modules from the BSP compilation.**
+
+* TX: connector `J25`, pin `15`.
+* RX: connector `J25`, pin `13`.
+
 ### System View
 
-For information about System View, please visit [SEGGER website](https://www.segger.com/products/development-tools/systemview/) or [MicroEJ documentation](https://docs.microej.com/en/latest/VEEPortingGuide/systemView.html#microej-core-engine-os-task).
+For information about System View, see the [SEGGER website](https://www.segger.com/products/development-tools/systemview/) or [MicroEJ documentation](https://docs.microej.com/en/latest/VEEPortingGuide/systemView.html#microej-core-engine-os-task).
 
 Follow these steps to run a System View live analysis:
 
 * Set `ENABLE_SYSTEM_VIEW` CMake variable to 1 in [CMakePresets.json](bsp/vee/scripts/armgcc/CMakePresets.json).
 * Call [clean.bat](bsp/vee/scripts/clean.bat) or [clean.sh](bsp/vee/scripts/clean.sh).
-* Set `FLASH_CMD` to `flash` in [set_project_env.bat](bsp/vee/scripts/set_project_env.bat) or [set_project_env.sh](bsp/vee/scripts/set_project_env.sh).
-* Execute `runOnDevice` gradle task. Use a J-Link probe to flash your target.
+* Set `CHOSEN_PROBE` to `flash` in [set_project_env.bat](bsp/vee/scripts/set_project_env.bat) or [set_project_env.sh](bsp/vee/scripts/set_project_env.sh).
+* Execute the `runOnDevice` Gradle task. Use a J-Link probe to flash your target.
 * Open System View PC application
 * Go to Target > Start Recording
 * Select the following Recorder Configuration:
@@ -474,9 +413,9 @@ Follow these steps to run a System View live analysis:
   * RTT Control Block Detection = Auto
 * Click Ok
 
-If you have an issue, please have a look at the [Troubleshooting section](https://docs.microej.com/en/latest/VEEPortingGuide/systemView.html#troubleshooting) in MicroEJ documentation.
+If you have an issue, see the [Troubleshooting section](https://docs.microej.com/en/latest/VEEPortingGuide/systemView.html#troubleshooting) of the MicroEJ documentation.
 
-### Ethernet port configuration
+### Ethernet Port Configuration
 
 By default, this VEE Port uses the 1G ethernet port.
 
@@ -484,6 +423,10 @@ It can also be configured to use the second 100M port instead. To do this, follo
 
 * Set `BOARD_NETWORK_USE_100M_ENET_PORT` to 1 in [board.h](bsp/vee/src/bsp/board.h)
 * If you are using a `MIMXRT1170-EVKB`, remove the resistor `R136`. This is done to avoid issues with the MDC pin of the port.
+
+### MicroEJ Core Validation
+
+To launch MicroEJ Core validation, set `RUN_MICROEJ_CORE_VALIDATION` CMake variable in [CMakePresets.json](bsp/vee/scripts/armgcc/CMakePresets.json).
 
 ## Troubleshooting
 
@@ -503,7 +446,7 @@ Run the following command:
 
 #### West Update and "PermissionError: [WinError 5] Access is denied" Issue
 
-If you get the error `PermissionError: [WinError 5] Access is denied`, please consider the following procedure :
+If you get the error `PermissionError: [WinError 5] Access is denied`, use the following procedure:
 
 ```bash
 rm .west
@@ -513,7 +456,7 @@ cd ..
 west update
 ```
 
-### Ninja errors during BSP build
+### Ninja Errors during BSP Build
 
 #### Ninja: error: loading 'build.ninja': The system cannot find the file specified
 
@@ -525,66 +468,43 @@ ninja: error: loading 'build.ninja': The system cannot find the file specified.
 make: *** [remake] Error 1
 ```
 
-There are two common reasons for this issue:
+There are three common reasons for this issue:
 
 - **CMake cache problem**
   The build system may be using outdated or corrupted cache files.
-  Fix: please remove the cmake cache by running [clean.bat](bsp/vee/scripts/clean.bat) or [clean.sh](bsp/vee/scripts/clean.sh).
+  Fix: remove the CMake cache by running [clean.bat](bsp/vee/scripts/clean.bat) or [clean.sh](bsp/vee/scripts/clean.sh).
 
 - **Path length limitation on Windows**
   If the Git project is cloned into a directory with a very long path, the `mcux-sdk` dependency might not clone properly.
   Fix: move or clone the project into a directory with a path as short as possible.
 
-### Flash issue
+- **Repository cloned with Git instead of West**
+  If the repository is cloned with `git clone` instead of `west init` and `west update`, the `bsp/mcux-sdk` directory is not populated.
+  Fix: fetch the dependencies with West, from the root directory of the cloned repository:
+
+  ```bash
+  west init -l
+  cd ..
+  west update
+  ```
+
+### Flash Issue
 
 Flash may not work out of the box.
-If this is the case, please:
- - Check if correct probe is chosen based on effective flash method
- - Update firmware of the on-board debugger (that may not be up-to-date)
+If this is the case:
 
+- Check that the chosen probe matches the flash method used.
+- Update the firmware of the on-board debugger, which may not be up to date.
 
-### Known issues
+### Known Issues
 
-#### RSA key size limited to 2048 bits
+The known issues and limitations of this release are listed in the [release notes](RELEASE_NOTES.md).
 
-Due to a known bug, the RSA key size for the SECURITY Foundation Library is limited to 2048 bits, larger keys will cause errors.
+---
 
-#### secp256k1 curve not supported by KeyPairGenerator
+_Markdown_  
 
-The secp256k1 elliptic curve is not supported by the [KeyPairGenerator](https://repository.microej.com/javadoc/microej_5.x/apis/java/security/KeyPairGenerator.html) and causes a crash when MBEDTLS_FREESCALE_CAAM_PKHA flag is defined.
+_Copyright 2026 MicroEJ Corp. All rights reserved._
+_Use of this source code is governed by a BSD-style license that can be found with this software._
 
-
-## Support
-
-### BSP (Board Support Package)
-
-The BSP is based on the following versions:
-
-* [MCUXpresso SDK](https://mcuxpresso.nxp.com/en/welcome) `2.15.100` for i.MX RT1170 Evaluation Kit
-* [FreeRTOS](https://www.freertos.org/index.html) version `10.5.1`
- 
-### Project Metadata
-
-<!----- Boards ----->
-[![Board badge](https://img.shields.io/badge/Board-MIMXRT1170&ndash;EVK-blue)](https://github.com/search?q=org%3Anxp-appcodehub+MIMXRT1170-EVK+in%3Areadme&type=Repositories) [![Board badge](https://img.shields.io/badge/Board-MIMXRT1170&ndash;EVKB-blue)](https://github.com/search?q=org%3Anxp-appcodehub+MIMXRT1170-EVKB+in%3Areadme&type=Repositories)
-
-<!----- Categories ----->
-[![Category badge](https://img.shields.io/badge/Category-RTOS-yellowgreen)](https://github.com/search?q=org%3Anxp-appcodehub+rtos+in%3Areadme&type=Repositories)
-
-<!----- Peripherals ----->
-[![Peripheral badge](https://img.shields.io/badge/Peripheral-DISPLAY-yellow)](https://github.com/search?q=org%3Anxp-appcodehub+display+in%3Areadme&type=Repositories)
-
-Questions regarding the content/correctness of this example can be entered as Issues within this GitHub repository.
-
->**Warning**: For more general technical questions regarding NXP Microcontrollers and the difference in expected functionality, enter your questions on the [NXP Community Forum](https://community.nxp.com/)
-
-[![Follow us on Youtube](https://img.shields.io/badge/Youtube-Follow%20us%20on%20Youtube-red.svg)](https://www.youtube.com/NXP_Semiconductors)
-[![Follow us on LinkedIn](https://img.shields.io/badge/LinkedIn-Follow%20us%20on%20LinkedIn-blue.svg)](https://www.linkedin.com/company/nxp-semiconductors)
-[![Follow us on Facebook](https://img.shields.io/badge/Facebook-Follow%20us%20on%20Facebook-blue.svg)](https://www.facebook.com/nxpsemi/)
-[![Follow us on Twitter](https://img.shields.io/badge/X-Follow%20us%20on%20X-black.svg)](https://x.com/NXP)
-
-## Release Notes
-
-| Version | Description / Update                                 | Date                        |
-|:-------:|------------------------------------------------------|----------------------------:|
-| 3.1.0     | This is NXP Platform Accelerator for i.MX RT1170 EVK with a RK055HDMIPI4MA0 display panel.        | Sep 12<sup>th</sup> 2025 |
+_Build: 7E4D1F7C_

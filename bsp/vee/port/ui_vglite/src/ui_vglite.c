@@ -1,7 +1,7 @@
 /*
  * C
  *
- * Copyright 2020-2025 MicroEJ Corp. All rights reserved.
+ * Copyright 2020-2025 MicroEJ Corp.
  * Use of this source code is governed by a BSD-style license that can be found with this software.
  */
 
@@ -9,7 +9,9 @@
  * @file
  * @brief MicroEJ MicroUI library low level API: implementation of ui_vglite.h.
  * @author MicroEJ Developer Team
- * @version 10.0.0
+ * @version 11.0.0
+ * 
+ * MicroEJ : added gc parameter to UI_VGLITE_IMPL_notify_gpu_start and UI_VGLITE_IMPL_notify_gpu_stop functions
  */
 
 // -----------------------------------------------------------------------------
@@ -79,7 +81,7 @@ typedef enum {
  */
 static vg_lite_buffer_t destination_buffer;
 
-#ifdef VGLITE_OPTION_TOGGLE_GPU
+#if defined VGLITE_OPTION_TOGGLE_GPU && (VGLITE_OPTION_TOGGLE_GPU == 1)
 /*
  * @brief flag to enable/disable hardware rendering
  */
@@ -177,7 +179,7 @@ static const bool __microui_to_premul[] = {
 	true,       // MICROUI_IMAGE_FORMAT_ARGB8888 = 2,
 	false,      // MICROUI_IMAGE_FORMAT_RGB888 = 3, unsupported
 	false,      // MICROUI_IMAGE_FORMAT_RGB565 = 4,
-	true,       // MICROUI_IMAGE_FORMAT_ARGB1555 = 5,
+	false,      // MICROUI_IMAGE_FORMAT_ARGB1555 = 5,
 	true,       // MICROUI_IMAGE_FORMAT_ARGB4444 = 6,
 	// outside of the table ... false,
 };
@@ -235,7 +237,7 @@ static vg_lite_buffer_format_t __convert_format(MICROUI_ImageFormat microui_form
 	return vg_lite_format;
 }
 
-static vg_lite_buffer_format_t __convert_input_format(MICROUI_Image *image) {
+static vg_lite_buffer_format_t __convert_input_format(MICROUI_Image *image, vg_lite_blend_t *blend) {
 	MICROUI_ImageFormat microui_format = (MICROUI_ImageFormat)image->format;
 	vg_lite_buffer_format_t vg_lite_format = __convert_format(microui_format);
 
@@ -252,7 +254,7 @@ static vg_lite_buffer_format_t __convert_input_format(MICROUI_Image *image) {
 		if (premul_required) {
 			if (VG_LITE_SUCCESS != vg_lite_enable_premultiply()) {
 				// pre-multiplication cannot be enabled or unsupported
-#ifndef VGLITE_USE_GPU_FOR_TRANSPARENT_IMAGES
+#if defined VGLITE_USE_GPU_FOR_TRANSPARENT_IMAGES && (VGLITE_USE_GPU_FOR_TRANSPARENT_IMAGES != 1)
 				// cannot draw a transparent image without applying a pre-multiplication
 				vg_lite_format = VG_LITE_UNKNOWN_FORMAT;
 #endif // VGLITE_USE_GPU_FOR_TRANSPARENT_IMAGES
@@ -264,6 +266,9 @@ static vg_lite_buffer_format_t __convert_input_format(MICROUI_Image *image) {
 			// premultiplication useless and nothing to disable
 			// -> nothing to do
 		}
+
+		// VGLite4: requires the blending mode to adjust the premultiplication
+		*blend = VG_LITE_BLEND_SRC_OVER;
 	}
 
 	return vg_lite_format;
@@ -324,28 +329,28 @@ void UI_VGLITE_start(void *binary_semaphore) {
 }
 
 void UI_VGLITE_enable_hardware_rendering(void) {
-#ifdef VGLITE_OPTION_TOGGLE_GPU
+#if defined VGLITE_OPTION_TOGGLE_GPU && (VGLITE_OPTION_TOGGLE_GPU == 1)
 	hardware_rendering = true;
 #endif
 }
 
 // See the header file for the function documentation
 void UI_VGLITE_disable_hardware_rendering(void) {
-#ifdef VGLITE_OPTION_TOGGLE_GPU
+#if defined VGLITE_OPTION_TOGGLE_GPU && (VGLITE_OPTION_TOGGLE_GPU == 1)
 	hardware_rendering = false;
 #endif
 }
 
 // See the header file for the function documentation
 void UI_VGLITE_toggle_hardware_rendering(void) {
-#ifdef VGLITE_OPTION_TOGGLE_GPU
+#if defined VGLITE_OPTION_TOGGLE_GPU && (VGLITE_OPTION_TOGGLE_GPU == 1)
 	hardware_rendering = !hardware_rendering;
 #endif
 }
 
 // See the header file for the function documentation
 bool UI_VGLITE_is_hardware_rendering_enabled(void) {
-#ifdef VGLITE_OPTION_TOGGLE_GPU
+#if defined VGLITE_OPTION_TOGGLE_GPU && (VGLITE_OPTION_TOGGLE_GPU == 1)
 	return hardware_rendering;
 #else
 	return true;
@@ -371,13 +376,13 @@ vg_lite_buffer_t * UI_VGLITE_configure_destination(MICROUI_GraphicsContext *gc) 
 }
 
 // See the header file for the function documentation
-bool UI_VGLITE_configure_source(vg_lite_buffer_t *buffer, MICROUI_Image *image) {
+bool UI_VGLITE_configure_source(vg_lite_buffer_t *buffer, MICROUI_Image *image, vg_lite_blend_t *blend) {
 	bool ret = false;
 
 	uint32_t stride = LLUI_DISPLAY_getStrideInBytes(image);
 
 	if (LLUI_DISPLAY_IMPL_getNewImageStrideInBytes(image->format, image->width, image->height, stride) == stride) {
-		vg_lite_buffer_format_t format = __convert_input_format(image);
+		vg_lite_buffer_format_t format = __convert_input_format(image, blend);
 
 		if (VG_LITE_UNKNOWN_FORMAT != format) {
 			__buffer_default_configuration(buffer);

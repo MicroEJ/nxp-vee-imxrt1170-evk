@@ -1,0 +1,62 @@
+From f1eb70cf8eed24f9ff93f40be2e1a9740ae04e88 Mon Sep 17 00:00:00 2001
+From: Adrien Bruant <adrien.bruant@microej.com>
+Date: Mon, 10 Nov 2025 16:02:17 +0100
+Subject: [PATCH] fix adapter_lpuart with `HAL_UART_DMA_RING_BUFFER_ENABLE`
+
+This commit fixes a bug in fsl_adapter_lpuart feature
+`HAL_UART_DMA_RING_BUFFER_ENABLE` where the upper layer callback isn't
+notified unless the RX line goes to the idle state. This would cause
+lost bytes when receiving a continuous byte stream. The bug is fixed
+by enabling two interrupts from the eDMA (transfer completed and
+half-completed). This effectively implements a circular buffer filled
+by DMA and where the CPU is notified before the buffer overruns or when
+the RX line goes idle.
+---
+ components/uart/fsl_adapter_lpuart.c | 15 +++++++--------
+ 1 file changed, 7 insertions(+), 8 deletions(-)
+
+diff --git a/components/uart/fsl_adapter_lpuart.c b/components/uart/fsl_adapter_lpuart.c
+index fb88ae374..cf247e7f5 100644
+--- a/components/uart/fsl_adapter_lpuart.c
++++ b/components/uart/fsl_adapter_lpuart.c
+@@ -1681,14 +1681,12 @@ void ADMA_UART3_INT_IRQHandler(void)
+ 
+ #if (defined(HAL_UART_DMA_ENABLE) && (HAL_UART_DMA_ENABLE > 0U))
+ #if (defined(HAL_UART_DMA_RING_BUFFER_ENABLE) && (HAL_UART_DMA_RING_BUFFER_ENABLE > 0U))
+-static volatile uint32_t ringBufferFlag = 0U;
+ /* LPUART RX EDMA call back. */
+ static void LPUART_RxEDMACallback(edma_handle_t *handle, void *param, bool transferDone, uint32_t tcds)
+ {
+-    if (true == transferDone)
+-    {
+-        ringBufferFlag++;
+-    }
++    hal_uart_state_t *uartHandle = (hal_uart_state_t *)param;
++
++    HAL_UartDMAIdlelineInterruptHandle(uartHandle->instance);
+ }
+ 
+ /* Start ring buffer. */
+@@ -1720,15 +1718,16 @@ static void LPUART_StartRingBufferEDMA(hal_uart_handle_t handle)
+     EDMA_TcdSetTransferConfig(&uartDmaHandle->rxEdmaHandle.tcdPool[0U], &xferConfig,
+                               tcdMemoryPoolPtr[uartHandle->instance]);
+ 
+-    /* Enable major interrupt for counting received bytes. */
+-    uartDmaHandle->rxEdmaHandle.tcdPool[0U].CSR |= 0x2U;
++    /* Enable 'major' and 'half' interrupts to continuously process received bytes. Enabling half interrupts lets the CPU
++    process the received bytes on one half of the buffer while the eDMA instance keeps writing to the other half. */
++    EDMA_TcdEnableInterrupts(uartDmaHandle->rxEdmaHandle.tcdPool, kEDMA_MajorInterruptEnable | kEDMA_HalfInterruptEnable);
+ 
+     /* There is no live chain, TCD block need to be installed in TCD registers. */
+     EDMA_InstallTCD(uartDmaHandle->rxEdmaHandle.base, uartDmaHandle->rxEdmaHandle.channel,
+                     &uartDmaHandle->rxEdmaHandle.tcdPool[0U]);
+ 
+     /* Setup call back function. */
+-    EDMA_SetCallback(&uartDmaHandle->rxEdmaHandle, LPUART_RxEDMACallback, NULL);
++    EDMA_SetCallback(&uartDmaHandle->rxEdmaHandle, LPUART_RxEDMACallback, uartHandle);
+ 
+     /* Start EDMA transfer. */
+     EDMA_StartTransfer(&uartDmaHandle->rxEdmaHandle);
+-- 
+2.50.1.windows.1
+

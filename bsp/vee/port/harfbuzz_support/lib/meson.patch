@@ -1,0 +1,92 @@
+diff --git a/meson.build b/meson.build
+index 1ce5f0136..c67f8cf93 100644
+--- a/meson.build
++++ b/meson.build
+@@ -1,3 +1,25 @@
++# Copyright 2024-2026 MicroEJ Corp. This file has been modified and/or created by MicroEJ Corp.
++#
++# This is part of HarfBuzz, a text shaping library.
++#
++# Permission is hereby granted, without written agreement and without
++# license or royalty fees, to use, copy, modify, and distribute this
++# software and its documentation for any purpose, provided that the
++# above copyright notice and the following two paragraphs appear in
++# all copies of this software.
++#
++# IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE TO ANY PARTY FOR
++# DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
++# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN
++# IF THE COPYRIGHT HOLDER HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH
++# DAMAGE.
++#
++# THE COPYRIGHT HOLDER SPECIFICALLY DISCLAIMS ANY WARRANTIES, INCLUDING,
++# BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
++# FITNESS FOR A PARTICULAR PURPOSE.  THE SOFTWARE PROVIDED HEREUNDER IS
++# ON AN "AS IS" BASIS, AND THE COPYRIGHT HOLDER HAS NO OBLIGATION TO
++# PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
++
+ project('harfbuzz', ['c', 'cpp'],
+   meson_version: '>= 0.60.0',
+   version: '12.3.0',
+@@ -107,7 +129,11 @@ check_funcs = [
+ 
+ m_dep = cpp.find_library('m', required: false)
+ 
+-freetype_dep = dependency('freetype2', version: freetype_min_version, required: get_option('freetype'), default_options: ['harfbuzz=disabled'])
++if get_option('freetype_includes') != ''
++  freetype_dep = declare_dependency(include_directories: include_directories(get_option('freetype_includes')))
++else
++  freetype_dep = dependency('freetype2', version: freetype_min_version, required: get_option('freetype'), default_options: ['harfbuzz=disabled'])
++endif
+ glib_dep = dependency('glib-2.0', version: glib_min_version, required: get_option('glib'))
+ gobject_dep = dependency('gobject-2.0', version: glib_min_version, required: get_option('gobject'))
+ graphite2_dep = dependency('graphite2', version: graphite2_min_version, required: get_option('graphite2'))
+@@ -326,7 +352,7 @@ endif
+ 
+ # threads
+ thread_dep = null_dep
+-if host_machine.system() != 'windows'
++if host_machine.system() != 'windows' and host_machine.system() != 'bare-metal'
+   thread_dep = dependency('threads', required: false)
+ 
+   if thread_dep.found()
+diff --git a/meson_options.txt b/meson_options.txt
+index a35ab4860..a0bfb9f8a 100644
+--- a/meson_options.txt
++++ b/meson_options.txt
+@@ -1,3 +1,25 @@
++# Copyright 2024-2026 MicroEJ Corp. This file has been modified and/or created by MicroEJ Corp.
++#
++# This is part of HarfBuzz, a text shaping library.
++#
++# Permission is hereby granted, without written agreement and without
++# license or royalty fees, to use, copy, modify, and distribute this
++# software and its documentation for any purpose, provided that the
++# above copyright notice and the following two paragraphs appear in
++# all copies of this software.
++#
++# IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE TO ANY PARTY FOR
++# DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
++# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN
++# IF THE COPYRIGHT HOLDER HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH
++# DAMAGE.
++#
++# THE COPYRIGHT HOLDER SPECIFICALLY DISCLAIMS ANY WARRANTIES, INCLUDING,
++# BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
++# FITNESS FOR A PARTICULAR PURPOSE.  THE SOFTWARE PROVIDED HEREUNDER IS
++# ON AN "AS IS" BASIS, AND THE COPYRIGHT HOLDER HAS NO OBLIGATION TO
++# PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
++
+ # HarfBuzz feature options
+ option('glib', type: 'feature', value: 'auto',
+   description: 'Enable GLib unicode functions')
+@@ -58,3 +80,8 @@ option('fuzzer_ldflags', type: 'string',
+ # Install directory options
+ option('cmakepackagedir', type: 'string',
+   description: 'CMake package configuration install directory')
++
++# Include path options
++option('freetype_includes', type : 'string',
++  description : 'Path to FreeType include directory (which must contain ft2build.h)')
++  
+\ No newline at end of file

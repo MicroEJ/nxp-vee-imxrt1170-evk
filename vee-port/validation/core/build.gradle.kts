@@ -1,3 +1,10 @@
+/*
+ * Kotlin
+ *
+ * Copyright 2026 MicroEJ Corp. All rights reserved.
+ * Use of this source code is governed by a BSD-style license that can be found with this software.
+ */
+
 import com.microej.gradle.plugins.TestMode
 import com.microej.gradle.plugins.TestTarget
 
@@ -11,7 +18,17 @@ microej {
 }
 
 dependencies {
+    // Use a VEE Port included in the same multi-project as this validation application
     microejVee(project(":vee-port"))
+
+    // Use a published version of a VEE Port
+    // or a local VEE Port project with includeBuild directive
+    // microejVee("com.mycompany:vee-port:1.0.0")
+
+    // Use a built VEE Port (can be used for SDK5 compatibility)
+    // In this case, architectureUsage is determined by the VEE Port
+    // Use double "\" on Windows
+    // microejVee(files("/path/to/vee-port/build/veePort/source"))
 }
 
 testing {

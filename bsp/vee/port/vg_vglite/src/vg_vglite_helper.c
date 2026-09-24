@@ -1,7 +1,7 @@
 /*
  * C
  *
- * Copyright 2024-2025 MicroEJ Corp. All rights reserved.
+ * Copyright 2024-2026 MicroEJ Corp.
  * Use of this source code is governed by a BSD-style license that can be found with this software.
  */
 
@@ -9,7 +9,7 @@
  * @file
  * @brief Definition of vg_vglite_helper.h functions.
  * @author MicroEJ Developer Team
- * @version 9.0.1
+ * @version 10.0.1
  */
 
 // -----------------------------------------------------------------------------
@@ -20,6 +20,7 @@
 
 #include <LLVG_MATRIX_impl.h>
 
+#include "vg_configuration.h"
 #include "vg_helper.h"
 #include "vg_vglite_helper.h"
 
@@ -44,7 +45,7 @@ vg_lite_error_t VG_VGLITE_HELPER_to_vg_lite_gradient(vg_lite_linear_gradient_t *
 		LLVG_MATRIX_IMPL_concatenate(mapped_gradient_matrix, matrix);
 		LLVG_MATRIX_IMPL_translate(mapped_gradient_matrix, header->x, header->y);
 		LLVG_MATRIX_IMPL_rotate(mapped_gradient_matrix, header->angle);
-		LLVG_MATRIX_IMPL_scale(mapped_gradient_matrix, header->length / VGLITE_GRADIENT_SIZE, 1);
+		LLVG_MATRIX_IMPL_scale(mapped_gradient_matrix, header->length / (float)VGLITE_GRADIENT_SIZE, 1);
 
 		// update vg lite colors
 		uint32_t *colors_addr = &(((uint32_t *)header)[header->colors_offset]);

@@ -4274,23 +4274,6 @@ extern time_t LLNET_SSL_utils_custom_mbedtls_time(time_t *time);
  */
 //#define MBEDTLS_TLS_EXT_CID                        254
 
-/**
- * Complete list of ciphersuites to use, in order of preference.
- *
- * \warning No dependency checking is done on that field! This option can only
- * be used to restrict the set of available ciphersuites. It is your
- * responsibility to make sure the needed modules are active.
- *
- * Use this to save a few hundred bytes of ROM (default ordering of all
- * available ciphersuites) and a few to a few hundred bytes of RAM.
- *
- * The value below is only an example, not the default.
- */
-#define MBEDTLS_SSL_CIPHERSUITES  MBEDTLS_TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,                   \
-		MBEDTLS_TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA256, MBEDTLS_TLS_ECDHE_RSA_WITH_AES_128_CBC_SHA, \
-		MBEDTLS_TLS_DHE_RSA_WITH_AES_128_CBC_SHA, MBEDTLS_TLS_RSA_WITH_3DES_EDE_CBC_SHA,           \
-		MBEDTLS_TLS_DHE_RSA_WITH_AES_256_CBC_SHA, MBEDTLS_TLS_RSA_WITH_AES_256_CBC_SHA
-
 /* X509 options */
 //#define MBEDTLS_X509_MAX_INTERMEDIATE_CA   8   /**< Maximum number of intermediate CAs in a verification chain. */
 //#define MBEDTLS_X509_MAX_FILE_PATH_LEN     512 /**< Maximum length of a path/filename string in bytes including the
