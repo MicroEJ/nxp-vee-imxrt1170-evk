@@ -1,7 +1,7 @@
 /*
  * C
  *
- * Copyright 2019-2025 MicroEJ Corp. All rights reserved.
+ * Copyright 2019-2025 MicroEJ Corp.
  * Use of this source code is governed by a BSD-style license that can be found with this software.
  */
 
@@ -10,7 +10,9 @@
  * @brief MicroEJ MicroUI library low level API: implementation over VGLite. Provides
  * a set of helper functions to target the VGLite library.
  * @author MicroEJ Developer Team
- * @version 10.0.0
+ * @version 11.0.0
+ * 
+ * MicroEJ : added gc parameter to UI_VGLITE_IMPL_notify_gpu_start and UI_VGLITE_IMPL_notify_gpu_stop functions
  */
 
 #if !defined UI_VGLITE_H
@@ -36,22 +38,6 @@ extern "C" {
 
 #ifndef VG_DRIVER_SINGLE_THREAD
 #error "This define must be set in the BSP pre-processor options."
-#endif
-
-/**
- * Sanity check between the expected version of the configuration and the actual version of
- * the configuration.
- * If an error is raised here, it means that a new version of the CCO has been installed and
- * the configuration ui_vglite_configuration.h must be updated based on the one provided
- * by the new CCO version.
- */
-
-#if !defined UI_VGLITE_CONFIGURATION_VERSION
-#error "Undefined UI_VGLITE_CONFIGURATION_VERSION, it must be defined in ui_vglite_configuration.h"
-#endif
-
-#if defined UI_VGLITE_CONFIGURATION_VERSION && UI_VGLITE_CONFIGURATION_VERSION != 1
-#error "Version of the configuration file ui_vglite_configuration.h is not compatible with this implementation."
 #endif
 
 // -----------------------------------------------------------------------------
@@ -154,10 +140,11 @@ vg_lite_buffer_t * UI_VGLITE_configure_destination(MICROUI_GraphicsContext *gc);
  *
  * @param[in] buffer: source buffer
  * @param[in] image: source image
+ * @param[in] blend: blend mode
  *
  * @return false if source image format is not supported by vg_lite, true on success
  */
-bool UI_VGLITE_configure_source(vg_lite_buffer_t *buffer, MICROUI_Image *image);
+bool UI_VGLITE_configure_source(vg_lite_buffer_t *buffer, MICROUI_Image *image, vg_lite_blend_t *blend);
 
 /**
  * @brief Premultiplies color components with the opacity to be compatible with VGLite GPU.

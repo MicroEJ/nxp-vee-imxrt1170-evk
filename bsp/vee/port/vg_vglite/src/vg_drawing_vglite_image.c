@@ -1,7 +1,7 @@
 /*
  * C
  *
- * Copyright 2022-2025 MicroEJ Corp. All rights reserved.
+ * Copyright 2022-2026 MicroEJ Corp.
  * Use of this source code is governed by a BSD-style license that can be found with this software.
  */
 
@@ -10,7 +10,7 @@
  * @brief MicroEJ MicroVG library low level API: image management. This file draws an
  * image and can fill a BufferedVectorImage.
  * @author MicroEJ Developer Team
- * @version 9.0.1
+ * @version 10.0.1
  */
 
 // -----------------------------------------------------------------------------
@@ -28,7 +28,6 @@
 #include "vg_configuration.h"
 #include "ui_color.h"
 #include "vg_helper.h"
-#include "vg_trace.h"
 #include "vg_drawing_vglite.h"
 #include "ui_util.h"
 #include "vg_vglite_helper.h"
@@ -36,7 +35,6 @@
 
 #include "vg_lite.h"
 #include "vg_lite_kernel.h"
-#include "fsl_debug_console.h"
 
 #include "mej_math.h"
 
@@ -115,12 +113,6 @@ static inline void * MALLOC(size_t size) {
 #endif
 #define GRADIENT_CMP_SIZE (GRADIENT_COPY_SIZE - sizeof(vg_transformation_matrix))
 
-/*
- * @brief Macro to add an IMAGE event and its type.
- */
-#define LOG_MICROVG_IMAGE_START(fn) LOG_MICROVG_START(LOG_MICROVG_IMAGE_ID, CONCAT_DEFINES(LOG_MICROVG_IMAGE_, fn))
-#define LOG_MICROVG_IMAGE_END(fn) LOG_MICROVG_END(LOG_MICROVG_IMAGE_ID, CONCAT_DEFINES(LOG_MICROVG_IMAGE_, fn))
-
 #define MAP_NATIVE_MATRIX MAP_VGLITE_MATRIX
 
 // -----------------------------------------------------------------------------
@@ -132,8 +124,12 @@ static inline void * MALLOC(size_t size) {
 #define RAW_OFFSET_U32_DURATION (2u)
 #define RAW_OFFSET_U32_FLAGS (3u)
 
-#define RAW_FLAG_OVERLAP_PATH (0x01)
-#define RAW_FLAG_FREE_MEMORY_ON_CLOSE (0x02)
+#define FLAG_TYPE_DIRECT ((uint8_t)(0x00))  // (00)b
+#define FLAG_TYPE_HEAP ((uint8_t)(0x01))  // (01)b
+#define FLAG_TYPE_BUFFERED ((uint8_t)(0x02))  // (10)b
+#define FLAG_TYPE_BUILDER ((uint8_t)(0x03))  // (11)b
+#define FLAG_TYPE_MASK ((uint8_t)(0x03))  // (11)b
+#define FLAG_OVERLAP_PATH ((uint8_t)(0x04))
 
 // -----------------------------------------------------------------------------
 // Typedef
@@ -230,12 +226,12 @@ enum vg_block_kind {
 	VG_BLOCK_PATH_COLOR_ANIMATE,
 	VG_BLOCK_PATH_GRADIENT_ANIMATE,
 
-#if defined VG_FEATURE_BUFFERED_VECTOR_IMAGE
+#if defined VG_FEATURE_BUFFERED_VECTOR_IMAGE && (VG_FEATURE_BUFFERED_VECTOR_IMAGE == 1)
 	// BVI only
 	VG_BLOCK_BVI_COLOR,
 	VG_BLOCK_BVI_GRADIENT,
 	VG_BLOCK_BVI_IMAGE,
-#endif // #if defined VG_FEATURE_BUFFERED_VECTOR_IMAGE
+#endif // #if defined VG_FEATURE_BUFFERED_VECTOR_IMAGE && (VG_FEATURE_BUFFERED_VECTOR_IMAGE == 1)
 };
 
 // -----------------------------------------------------------------------------
@@ -397,7 +393,7 @@ struct vg_block_bvi_image {
 	jchar alpha; // prevent to use the mask "& 0xff"
 
 	const vector_image_t *image;
-	jfloat matrix[9];
+	jfloat matrix[LLVG_MATRIX_SIZE];
 	int32_t scissor[4];
 	jfloat color_matrix[COLOR_MATRIX_SIZE];
 	jint elapsed_msb; // prevent unalignment access
@@ -621,7 +617,7 @@ struct vg_drawing {
  * @brief Internal MicroJVM function to retrieve a resource in the microejapp.o.
  *
  * @param[in] path: the path of the resource to retrieve
- * @param[out] resource: the resource metadata
+ * @param[out] resource: the resource
  */
 extern int32_t SNIX_get_resource(char *path, SNIX_resource *resource);
 
@@ -635,8 +631,8 @@ extern uint32_t vg_lite_get_scissor(int32_t **scissor);
 // -----------------------------------------------------------------------------
 
 /*
- * @brief Gradient used for all drawings with gradient (only one image allocation, * does not alterate the original
- * gradient's matrix and colors, etc.).
+ * @brief Gradient used for all drawings with gradient (only one image allocation,
+ * does not alterate the original gradient's matrix and colors, etc.).
  */
 static vg_gradient render_gradient;
 
@@ -650,7 +646,7 @@ static vg_lite_path_t render_path;
  */
 static vg_drawing_t drawing_data = { 0 };
 
-#if defined VG_FEATURE_BUFFERED_VECTOR_IMAGE
+#if defined VG_FEATURE_BUFFERED_VECTOR_IMAGE && (VG_FEATURE_BUFFERED_VECTOR_IMAGE == 1)
 
 /*
  * @brief BVI destination when rendering an image in a BVI
@@ -718,7 +714,7 @@ static void _free_data(const void *data) {
 #else
 		// cppcheck-suppress [misra-c2012-11.8] allow cast to uint8_t*
 		FREE((uint8_t *)data);
-#endif
+#endif /* ifdef DEBUG_ALLOCATOR */
 	}
 }
 
@@ -739,11 +735,11 @@ static inline uint8_t * _alloc_data(uint32_t size) {
 
 	uint8_t *ret = MALLOC(size);
 	if (NULL == ret) {
-		MEJ_LOG_ERROR_MICROVG("OOM\n");
+		MEJ_LOG_ERROR_MICROVG("OOM");
 	}
 
 #ifdef DEBUG_ALLOCATOR
-	MEJ_LOG_INFO_MICROVG("alloc %u\t0x%x\t(%u/%u)\n", size, ret, cumul, max);
+	MEJ_LOG_INFO_MICROVG("alloc %u\t0x%x\t(%u/%u)", size, ret, cumul, max);
 	*((uint32_t *)ret) = size;
 	ret += 4u;
 #endif
@@ -853,27 +849,23 @@ static uint8_t _filter_alpha(uint8_t alpha, const float color_matrix[]) {
 static uint32_t _prepare_render_color(uint32_t color, uint32_t alpha, const float color_matrix[]) {
 	uint32_t ret = color;
 	if (NULL != color_matrix) {
-		assert((uint32_t)0xff == alpha); // filter mode does not use global alpha (see MicroVG spec)
 		ret = _filter_color(color, color_matrix);
-	} else if (alpha != (uint32_t)0xff) {
-		ret = VG_HELPER_apply_alpha(color, alpha);
-	} else {
-		// nothing to change
+	}
+	if ((uint32_t)0xff != alpha) {
+		ret = VG_HELPER_apply_alpha(ret, alpha);
 	}
 	return ret;
 }
 
 static void _prepare_gradient_colors(vg_gradient *gradient, uint32_t alpha, const float color_matrix[]) {
 	if (NULL != color_matrix) {
-		assert((uint32_t)0xff == alpha); // filter mode does not use global alpha
 		_filter_gradient(gradient, color_matrix);
-	} else if (alpha != (uint32_t)0xff) {
+	}
+	if ((uint32_t)0xff != alpha) {
 		uint32_t *colors = (uint32_t *)gradient->colors;
 		for (int i = 0; i < gradient->count; i++) {
 			colors[i] = VG_HELPER_apply_alpha(colors[i], alpha);
 		}
-	} else {
-		// nothing to change
 	}
 }
 
@@ -1196,6 +1188,7 @@ static void _apply_path_animation_path_data(const vg_animation_header_t *animati
 	} else {
 		// last path (== path "to")
 		const vg_path_desc_t *to = get_path_addr(animation_path_data->to, memory_offset);
+		// cppcheck-suppress [misra-c2012-11.8] vg_lite requires a void*
 		dest->path = (void *)get_path_data_addr(to);
 		(void)memcpy((void *)&(dest->bounding_box), (const void *)&(to->bounding_box), 4u * sizeof(float));
 	}
@@ -1375,6 +1368,7 @@ static void _prepare_render_path(const vg_path_desc_t *path) {
 		path->format,
 		VG_LITE_HIGH,
 		path->length,
+		// cppcheck-suppress [misra-c2012-11.8] vg_lite requires a void*
 		(void *)get_path_data_addr(path), path->bounding_box[0], path->bounding_box[1], path->bounding_box[2],
 		path->bounding_box[3]
 		);
@@ -1525,6 +1519,7 @@ static void _get_image_parameters(const vector_image_t *image, vg_drawing_t *dra
 		drawing_data->memory_offset = (uintptr_t)image;
 	}
 
+	// cppcheck-suppress [misra-c2012-11.8] get the address of the block
 	uint8_t *first_block_addr = (uint8_t *)image->first_block;
 
 	// cppcheck-suppress [misra-c2012-18.4] adds the absolute memory offset
@@ -1540,7 +1535,7 @@ static void _get_image_parameters(const vector_image_t *image, vg_drawing_t *dra
 // Buffered vector images
 // -----------------------------------------------------------------------------
 
-#if defined VG_FEATURE_BUFFERED_VECTOR_IMAGE
+#if defined VG_FEATURE_BUFFERED_VECTOR_IMAGE && (VG_FEATURE_BUFFERED_VECTOR_IMAGE == 1)
 
 /*
  * @brief Tells if the image is in ROM.
@@ -1829,12 +1824,13 @@ static const int32_t * _bvi_restore_scissor(const int32_t *original_scissor, con
 	return original_scissor;
 }
 
-static vg_block_t * _bvi_clear_blocks(vector_buffered_image_t *image) {
+static void _bvi_clear_blocks(vector_buffered_image_t *image) {
 	vg_block_t *block = image->header.first_block;
 	while (VG_BLOCK_LAST != block->kind) {
 		block = _bvi_free_block(block);
 	}
-	return block;
+	image->header.first_block = block; // reset first block
+	image->latest_data = NULL; // reset to identify the very first block
 }
 
 /*
@@ -1907,11 +1903,11 @@ static float * _combine_color_matrices(float *a, float *b) {
 	return dest;
 }
 
-#endif // #if defined VG_FEATURE_BUFFERED_VECTOR_IMAGE
+#endif // #if defined VG_FEATURE_BUFFERED_VECTOR_IMAGE && (VG_FEATURE_BUFFERED_VECTOR_IMAGE == 1)
 
 static jint _draw_raw_image(vg_drawing_t *drawing_data, draw_image_element target, const jfloat *matrix, uint32_t alpha,
                             jlong elapsedTime, const float color_matrix[]) {
-#if defined VG_FEATURE_BUFFERED_VECTOR_IMAGE
+#if defined VG_FEATURE_BUFFERED_VECTOR_IMAGE && (VG_FEATURE_BUFFERED_VECTOR_IMAGE == 1)
 	/*
 	 * @brief Working data to draw a RAW image stored in a BVI.
 	 *
@@ -1929,7 +1925,7 @@ static jint _draw_raw_image(vg_drawing_t *drawing_data, draw_image_element targe
 	_store_matrix(&(drawing_data->first_transformation.matrix), (vg_transformation_matrix *)matrix);
 	vg_transformation_t *p_render_transformation = &(drawing_data->first_transformation);
 
-#if defined VG_FEATURE_BUFFERED_VECTOR_IMAGE
+#if defined VG_FEATURE_BUFFERED_VECTOR_IMAGE && (VG_FEATURE_BUFFERED_VECTOR_IMAGE == 1)
 
 	int32_t original_scissor[4];
 	int32_t *p_original_scissor;
@@ -1952,7 +1948,7 @@ static jint _draw_raw_image(vg_drawing_t *drawing_data, draw_image_element targe
 		p_current_scissor = NULL;
 	}
 
-#endif // #if defined VG_FEATURE_BUFFERED_VECTOR_IMAGE
+#endif // #if defined VG_FEATURE_BUFFERED_VECTOR_IMAGE && (VG_FEATURE_BUFFERED_VECTOR_IMAGE == 1)
 
 	jint ret = LLVG_SUCCESS;
 	bool done = false;
@@ -2188,7 +2184,7 @@ static jint _draw_raw_image(vg_drawing_t *drawing_data, draw_image_element targe
 		}
 		break;
 
-#if defined VG_FEATURE_BUFFERED_VECTOR_IMAGE
+#if defined VG_FEATURE_BUFFERED_VECTOR_IMAGE && (VG_FEATURE_BUFFERED_VECTOR_IMAGE == 1)
 
 		case VG_BLOCK_BVI_COLOR:
 		{
@@ -2291,10 +2287,10 @@ static jint _draw_raw_image(vg_drawing_t *drawing_data, draw_image_element targe
 		}
 		break;
 
-#endif // #if defined VG_FEATURE_BUFFERED_VECTOR_IMAGE
+#endif // #if defined VG_FEATURE_BUFFERED_VECTOR_IMAGE && (VG_FEATURE_BUFFERED_VECTOR_IMAGE == 1)
 
 		default:
-			MEJ_LOG_ERROR_MICROVG("unknown operation: %d\n", block->kind);
+			MEJ_LOG_ERROR_MICROVG("unknown operation: %d", block->kind);
 			ret = LLVG_DATA_INVALID;
 			done = true;
 			break;
@@ -2386,21 +2382,38 @@ static void _derive_raw_image(vg_drawing_t *drawing_data, const float color_matr
 		}
 		break;
 
-#if defined VG_FEATURE_BUFFERED_VECTOR_IMAGE
+#if defined VG_FEATURE_BUFFERED_VECTOR_IMAGE && (VG_FEATURE_BUFFERED_VECTOR_IMAGE == 1)
 
 		case VG_BLOCK_BVI_COLOR:
 		case VG_BLOCK_BVI_GRADIENT:
 		case VG_BLOCK_BVI_IMAGE:
 			// must not occur: can only derive from a RAW image (see BufferedVectorImage.filterImage())
 
-#endif // #if defined VG_FEATURE_BUFFERED_VECTOR_IMAGE
+#endif // #if defined VG_FEATURE_BUFFERED_VECTOR_IMAGE && (VG_FEATURE_BUFFERED_VECTOR_IMAGE == 1)
 
 		default:
-			MEJ_LOG_ERROR_MICROVG("unknown operation: %d\n", block->kind);
+			MEJ_LOG_ERROR_MICROVG("unknown operation: %d", block->kind);
 			done = true;
 			break;
 		}
 	}
+}
+
+/*
+ * Only called when killing a KF feature (automatic SNI resource management): have
+ * to wait the end of GPU before closing the image.
+ */
+static void _free_registered_image_in_heap(void *resource) {
+	// ensure GPU is not working in our image...
+	LLUI_DISPLAY_waitAsynchronousDrawingEnd();
+	// ... and close it
+	// cppcheck-suppress [misra-c2012-11.5] cast the resource in a memory address
+	LLUI_DISPLAY_IMPL_imageHeapFree((uint8_t *)resource);
+}
+
+static void _register_filtered_image_description(void *resource, char *buffer, uint32_t bufferLength) {
+	(void)resource;
+	REGISTERDESC("FilteredVectorImage", buffer, bufferLength);
 }
 
 /*
@@ -2412,112 +2425,256 @@ static inline bool _is_raw_image(const void *image) {
 	return 0 == memcmp((const uint8_t *)image, signature, sizeof(signature));
 }
 
-static inline void _store_image_metadata(const vector_image_t *image, jint extra_flags, jint *metadata) {
-	metadata[RAW_OFFSET_F32_WIDTH] = JFLOAT_TO_UINT32_t(image->width);
-	metadata[RAW_OFFSET_F32_HEIGHT] = JFLOAT_TO_UINT32_t(image->height);
-	metadata[RAW_OFFSET_U32_DURATION] = image->flags.duration;
-	metadata[RAW_OFFSET_U32_FLAGS] = (image->flags.overlapping ? RAW_FLAG_OVERLAP_PATH : 0) | extra_flags;
+/*
+ * @brief Checks if the given resource denotes a valid RAW vector image.
+ *
+ * @param[in] resource The resource to check
+ *
+ * @return LLVG_SUCCESS on success, LLVG_DATA_INVALID otherwise
+ */
+static jint _check_image(uint8_t *buffer) {
+	return _is_raw_image((const void *)buffer) ? LLVG_SUCCESS : LLVG_DATA_INVALID;
+}
+
+/*
+ * @brief Retrieves the given resource in the application resources list and check if it is
+ * a valid RAW vector image. Fully fills the SNI resource on success (address and size).
+ *
+ * @param[in] path The resource path to look for
+ * @param[out] resource The resource to fill
+ * @param[out] extra_flags The flag(s) to store in the final MicroVG image
+ *
+ * @return LLVG_SUCCESS on success, any other value on a failure.
+ */
+static jint _get_internal_image(char *path, SNIX_resource *resource, uint8_t *extra_flags) {
+	jint result;
+	int32_t sni_ret = SNIX_get_resource(path, resource);
+	if (sni_ret >= 0) {
+		*extra_flags |= FLAG_TYPE_DIRECT;
+		result = _check_image((uint8_t *)resource->data);
+	} else {
+		result = LLVG_DATA_INVALID_PATH;
+	}
+	return result;
 }
 
 #if VG_FEATURE_RAW_EXTERNAL
 
-static inline void _store_image_resource(vector_image_t *image, int32_t resource_size, MICROVG_Image *resource) {
-	resource->data = (void *)image;
-	resource->size = resource_size;
+static void _register_external_image_description(void *resource, char *buffer, uint32_t bufferLength) {
+	(void)resource;
+	REGISTERDESC("ExternalVectorImage", buffer, bufferLength);
 }
 
 /*
- * @brief Loads a RAW vector image from external memory
+ * @brief Checks if the given resource can be read without any loading in a third-party memory and if
+ * it is a valid RAW vector image. Fully fills the SNI resource on success (address and size).
  *
- * The resource is opened from external memory if it exists. Its address, size and metadata are stored in the output
- * parameters.
- * If the resource exists in a byte-addressable area, the output address will be that of this memory area.
- * Otherwise, a RAM area will be allocated on the MicroUI image heap, the resource will be copied into that area, and
- * the output address will be that of the newly allocated memory area.
- * In the latter case, metadata will contain a RAW_FLAG_FREE_MEMORY_ON_CLOSE. The caller is responsible for properly
- * deallocating the memory.
+ * @param[in] resource_id The resource to check
+ * @param[out] resource The resource to fill
+ * @param[out] extra_flags The flag(s) to store in the final MicroVG image
  *
- * @param[in] image_name: name of the image to be opened
- * @param[in] allocation_allowed: true to allow an allocation in the images heap, false when forbidden
- * @param[out] resource: structure to save the address and size of the image
- * @param[out] metadata: integer array to save the width, height, animation duration and flags of the image
+ * @return LLVG_SUCCESS on success, any other value on a failure.
+ */
+static jint _get_external_image(RES_ID resource_id, SNIX_resource *resource, uint8_t *extra_flags) {
+	jint result;
+	int32_t base_address = LLEXT_RES_getBaseAddress(resource_id);
+	if (-1 != base_address) {
+		// the resource is located in a byte-addressable memory area
+		resource->data = (void *)base_address;
+		resource->size = (uint32_t)LLEXT_RES_available(resource_id);
+		*extra_flags |= FLAG_TYPE_DIRECT;
+		result = _check_image((uint8_t *)resource->data);
+	} else {
+		// resource cannot be read: consider it as not available
+		result = LLVG_DATA_INVALID_PATH;
+	}
+	return result;
+}
+
+/*
+ * @brief Copies the external resource in the destination buffer and check if it is a valid RAW
+ * vector image.
+ *
+ * @param[in] resource_id The external resource identifier
+ * @param[in] size The resource size
+ * @param[in] destination The destination buffer
  *
  * @return LLVG_SUCCESS on a successful loading, any other value on a failure.
  */
-static int _load_external_image(char const *image_name, bool allocation_allowed, MICROVG_Image *resource,
-                                jint *metadata) {
-	int result = LLVG_SUCCESS;
+static jint _read_external_image(RES_ID resource_id, uint32_t size, uint8_t *destination) {
+	jint result;
 
-	// Ignore the leading '/' in the path.
-	char const *image_external_path = image_name;
-	image_external_path++;
-
-	// Open the resource matching the provided path.
-	RES_ID resource_id = LLEXT_RES_open(image_external_path);
-	if (0 > resource_id) {
-		result = LLVG_DATA_INVALID_PATH;
+	// read all the image data
+	int32_t read = (int32_t)size;
+	if (LLEXT_RES_OK == LLEXT_RES_read(resource_id, (void *)destination, &read)) {
+		// check incomplete reading and if it is a VG RAW image
+		result = (((uint32_t)read) == size) ? _check_image(destination) : LLVG_DATA_INVALID;
 	} else {
-		// Retrieve the address and size of the resource.
-		int32_t resource_size = LLEXT_RES_available(resource_id);
-		int32_t base_address = LLEXT_RES_getBaseAddress(resource_id);
-
-		vector_image_t *image = NULL;
-
-		if (-1 != base_address) {
-			// The resource is located in a byte-addressable memory area. This will be the output address.
-			// cppcheck-suppress [misra-c2012-11.4] base_address is a vector_image_t for sure
-			image = (vector_image_t *)base_address;
-
-			// Put the address, size and metadata in the ouptut parameters.
-			_store_image_resource(image, resource_size, resource);
-
-			result = LLVG_SUCCESS;
-		} else if (!allocation_allowed) {
-			// image is available but required a copy in the images heap
-			result = LLVG_DATA_INVALID_PATH;
-		} else {
-			// The resource is located in a memory area that cannot be byte-addressed.
-
-			// Allocate memory on the MicroUI image heap to store the image. Its address will be the output address.
-			image = (vector_image_t *)LLUI_DISPLAY_IMPL_imageHeapAllocate(resource_size);
-			if (NULL == image) {
-				// Out of memory.
-				result = LLVG_OUT_OF_MEMORY;
-			} else {
-				// Copy the image from the external memory into the allocated area.
-				if (LLEXT_RES_OK != LLEXT_RES_read(resource_id, (void *)image, &resource_size)) {
-					result = LLVG_DATA_INVALID;
-				} else if (!_is_raw_image((uint8_t *)image)) {
-					// it is not a RAW image -> free it
-					LLUI_DISPLAY_IMPL_imageHeapFree((uint8_t *)image);
-					result = LLVG_DATA_INVALID;
-				} else {
-					/* Put the address, size and metadata in the ouptut parameters.
-					 * RAW_FLAG_FREE_MEMORY_ON_CLOSE flags the image as requiring to be deallocated.
-					 */
-					_store_image_resource(image, resource_size, resource);
-					_store_image_metadata(image, RAW_FLAG_FREE_MEMORY_ON_CLOSE, metadata);
-					_tag_image_in_ram(image);
-
-					result = LLVG_SUCCESS;
-				}
-			}
-		}
-
-		// Close the resource.
-		LLEXT_RES_close(resource_id);
+		// cannot read
+		result = LLVG_DATA_INVALID;
 	}
 
 	return result;
 }
 
+/*
+ * @brief Loads the given resource in the MicroUI images heap and checks if it is a valid RAW vector image.
+ * Fully fills the SNI resource on success (address and size).
+ *
+ * @param[in] resource_id The resource to check
+ * @param[in] microvg_image The receiver
+ * @param[in] allocation_allowed True if the caller allows to copy the resource in the image heap
+ * @param[out] resource The resource to fill
+ * @param[out] extra_flags The flag(s) to store in the final MicroVG image
+ *
+ * @return LLVG_SUCCESS on success, any other value on a failure.
+ */
+static jint _load_external_image(RES_ID resource_id, MICROVG_Image *microvg_image, bool allocation_allowed,
+                                 SNIX_resource *resource, uint8_t *extra_flags) {
+	jint result;
+	uint32_t size;
+	uint8_t *destination;
+
+	if (!allocation_allowed) {
+		// no allowed to allocate, resource cannot be read: consider it as not available
+		result = LLVG_DATA_INVALID_PATH;
+		goto end;
+	}
+
+	size = (uint32_t)LLEXT_RES_available(resource_id);
+	destination = LLUI_DISPLAY_IMPL_imageHeapAllocate(size);
+	if (NULL == destination) {
+		// cannot allocate
+		result = LLVG_OUT_OF_MEMORY;
+		goto end;
+	}
+
+	result = _read_external_image(resource_id, size, destination);
+
+	if (LLVG_SUCCESS == result) {
+		// file has been copied in the image heap
+		resource->data = (void *)destination;
+		resource->size = size;
+		*extra_flags |= FLAG_TYPE_HEAP;
+		_tag_image_in_ram((vector_image_t *)destination);
+		int32_t registered = SNI_registerResource((void *)destination,
+		                                          (SNI_closeFunction) & _free_registered_image_in_heap,
+		                                          _register_external_image_description);
+		assert(SNI_OK == registered);
+	} else {
+		// error during reading: free the heap (keep "result" as error code)
+		LLUI_DISPLAY_IMPL_imageHeapFree(destination);
+	}
+
+end:
+	return result;
+}
+
+/*
+ * @brief Opens a valid RAW vector image from external memory. Fully fills the SNI resource on success (address and
+ * size).
+ *
+ * The resource is opened from external memory if it exists. Its address and size are stored in the output parameters.
+ * If the resource exists in a byte-addressable area, the output address will be that of this memory area.
+ * Otherwise, a RAM area will be allocated on the MicroUI image heap, the resource will be copied into that area, and
+ * the output address will be that of the newly allocated memory area.
+ * In the latter case, the caller is responsible for properly deallocating the memory.
+ *
+ * @param[in] path The resource path to look for
+ * @param[in] microvg_image The receiver
+ * @param[in] allocation_allowed True if the caller allows to copy the resource in the image heap
+ * @param[out] resource The resource to fill
+ * @param[out] extra_flags The flag(s) to store in the final MicroVG image
+ *
+ * @return LLVG_SUCCESS on a successful loading, any other value on a failure.
+ */
+static jint _open_external_image(char *path, MICROVG_Image *microvg_image, bool allocation_allowed,
+                                 SNIX_resource *resource, uint8_t *extra_flags) {
+	jint result;
+
+	// ignore the leading '/' in the path.
+	char const *image_external_path = path + 1;
+
+	RES_ID resource_id = LLEXT_RES_open(image_external_path);
+	if (0 > resource_id) {
+		// resource does not exist
+		result = LLVG_DATA_INVALID_PATH;
+		goto end;
+	}
+
+	// try to "get" an external image (no loading)
+	result = _get_external_image(resource_id, resource, extra_flags);
+
+	if (LLVG_DATA_INVALID_PATH == result) {
+		// try to load an external image
+		result = _load_external_image(resource_id, microvg_image, allocation_allowed, resource, extra_flags);
+	}
+
+	// in all cases (error or not), the resource has to be closed
+	LLEXT_RES_close(resource_id);
+
+end:
+	return result;
+}
+
 #endif // VG_FEATURE_RAW_EXTERNAL
+
+// cppcheck-suppress [misra-c2012-2.7] analyzer issue: this parameter is useless when VG_FEATURE_RAW_EXTERNAL is set
+static jint _open_image(char *path, jint path_length, MICROVG_Image *microvg_image, bool allocation_allowed) {
+	(void)path_length;
+#ifndef VG_FEATURE_RAW_EXTERNAL
+	(void)allocation_allowed;
+#endif // VG_FEATURE_RAW_EXTERNAL
+
+	SNIX_resource resource;
+	uint8_t extra_flags = 0;
+
+	// try to get an internal image
+	jint result = _get_internal_image(path, &resource, &extra_flags);
+
+#if VG_FEATURE_RAW_EXTERNAL
+	if (LLVG_DATA_INVALID_PATH == result) {
+		// try to get or load an external image
+		result = _open_external_image(path, microvg_image, allocation_allowed, &resource, &extra_flags);
+	}
+#endif // VG_FEATURE_RAW_EXTERNAL
+
+	if (LLVG_SUCCESS == result) {
+		// cppcheck-suppress [misra-c2012-11.5] resource is a vector image for sure
+		const vector_image_t *image = (const vector_image_t *)resource.data;
+		// cppcheck-suppress [misra-c2012-11.8] microvg_image requires a void*
+		microvg_image->data = (void *)image;
+		microvg_image->size = resource.size;
+		microvg_image->width = image->width;
+		microvg_image->height = image->height;
+		microvg_image->duration = image->flags.duration;
+		microvg_image->flags = (image->flags.overlapping ? FLAG_OVERLAP_PATH : 0u) | extra_flags;
+	}
+
+	return result;
+}
 
 // -----------------------------------------------------------------------------
 // BufferedVectorImage (BVI) Management
 // -----------------------------------------------------------------------------
 
-#if defined VG_FEATURE_BUFFERED_VECTOR_IMAGE
+#if defined VG_FEATURE_BUFFERED_VECTOR_IMAGE && (VG_FEATURE_BUFFERED_VECTOR_IMAGE == 1)
+
+/*
+ * Only called when killing a KF feature (automatic SNI resource management): have
+ * to wait the end of GPU before closing the image.
+ */
+static void _free_registered_buffered_image(void *resource) {
+	// ensure GPU is not working in our image...
+	LLUI_DISPLAY_waitAsynchronousDrawingEnd();
+	// ... and close it
+	_bvi_clear_blocks((vector_buffered_image_t *)resource);
+}
+
+static void _register_buffered_image_description(void *resource, char *buffer, uint32_t bufferLength) {
+	(void)resource;
+	REGISTERDESC("BufferedVectorImage", buffer, bufferLength);
+}
 
 void VG_BVI_VGLITE_initialize(void) {
 	// prepare the gradient used by all draw_gradient
@@ -2554,7 +2711,7 @@ void VG_BVI_VGLITE_initialize_new_image(MICROUI_Image *image) {
 }
 
 void VG_BVI_VGLITE_free_resources(MICROUI_Image *image) {
-	(void)_bvi_clear_blocks(MAP_BVI_ON_IMAGE(image));
+	_bvi_clear_blocks(MAP_BVI_ON_IMAGE(image));
 }
 
 jint VG_BVI_VGLITE_add_draw_path(
@@ -2657,7 +2814,7 @@ jint VG_BVI_VGLITE_add_draw_image(void *target, const MICROVG_Image *res, const 
 		 * the gradient data) but will not be updated.
 		 * A simple solution consists to ensure that next gradient comparison will fail.
 		 */
-		(void)memset(&render_gradient, 0, GRADIENT_CMP_SIZE);
+		(void)memset(&render_gradient, 0u, GRADIENT_CMP_SIZE);
 	}
 
 	return ret;
@@ -2666,24 +2823,27 @@ jint VG_BVI_VGLITE_add_draw_image(void *target, const MICROVG_Image *res, const 
 void LLVG_BVI_IMPL_map_context(MICROUI_Image *ui, MICROVG_Image *vg) {
 	vg->data = (void *)MAP_BVI_ON_IMAGE(ui);
 	vg->size = sizeof(vector_buffered_image_t);
+	vg->width = (float)ui->width;
+	vg->height = (float)ui->height;
+	vg->flags = FLAG_TYPE_BUFFERED;
+
+	int32_t registered = SNI_registerResource((void *)vg->data, (SNI_closeFunction) & _free_registered_buffered_image,
+	                                          &_register_buffered_image_description);
+	assert(SNI_OK == registered);
 }
 
 void LLVG_BVI_IMPL_clear(MICROUI_GraphicsContext *gc) {
 	if (LLUI_DISPLAY_requestDrawing(gc, (SNI_callback) & LLVG_BVI_IMPL_clear)) {
 		// map a struct on graphics context's pixel area
-		vector_buffered_image_t *image = MAP_BVI_ON_GC(gc);
-
-		image->header.first_block = _bvi_clear_blocks(image); // reset first block
-		image->latest_data = NULL; // reset to identify the very first block
-
+		_bvi_clear_blocks(MAP_BVI_ON_GC(gc));
 		LLUI_DISPLAY_setDrawingStatus(DRAWING_DONE);
 	}
 }
 
-#endif // #if defined VG_FEATURE_BUFFERED_VECTOR_IMAGE
+#endif // #if defined VG_FEATURE_BUFFERED_VECTOR_IMAGE && (VG_FEATURE_BUFFERED_VECTOR_IMAGE == 1)
 
 // -----------------------------------------------------------------------------
-// Java library natives
+// Image management
 // -----------------------------------------------------------------------------
 
 bool VG_DRAWING_image_is_closed(const MICROVG_Image *image) {
@@ -2691,58 +2851,22 @@ bool VG_DRAWING_image_is_closed(const MICROVG_Image *image) {
 }
 
 void VG_DRAWING_get_image_size(const MICROVG_Image *image, float *width, float *height) {
+	// cppcheck-suppress [misra-c2012-11.5] data is a vector image for sure
 	const vector_image_t *data = (const vector_image_t *)image->data;
 	*width = data->width;
 	*height = data->height;
 }
 
-jint Java_ej_microvg_VectorGraphicsNatives_getImage(char *path, jint path_length, MICROVG_Image *res, jint *metadata) {
-	LOG_MICROVG_IMAGE_START(load);
+// -----------------------------------------------------------------------------
+// Java library natives
+// -----------------------------------------------------------------------------
 
-	(void)path_length;
-
-	jint ret;
-	int32_t sni_ret = SNIX_get_resource(path, (SNIX_resource *)res);
-
-#if VG_FEATURE_RAW_EXTERNAL
-	// image not found in the application resource list
-	if ((sni_ret < 0) && (LLVG_SUCCESS == _load_external_image(path, false, res, metadata))) {
-		// image found available in external memory which is byte addressable
-		sni_ret = 0;
-	}
-#endif // VG_FEATURE_RAW_EXTERNAL
-
-	if (sni_ret < 0) {
-		ret = LLVG_DATA_INVALID_PATH;
-	}
-	// cppcheck-suppress [misra-c2012-11.5] cast the resource in a u8 address
-	else if (!_is_raw_image(res->data)) {
-		ret = LLVG_DATA_INVALID;
-	} else {
-		// cppcheck-suppress [misra-c2012-11.5] resource is a vector image for sure
-		const vector_image_t *image = (const vector_image_t *)res->data;
-
-		// metadata used by the Java library during image opening
-		_store_image_metadata(image, 0, metadata);
-
-		ret = LLVG_SUCCESS;
-	}
-
-	LOG_MICROVG_IMAGE_END(load);
-	return ret;
+jint Java_ej_microvg_VectorGraphicsNatives_getImage(char *path, jint path_length, MICROVG_Image *microvg_image) {
+	return _open_image(path, path_length, microvg_image, false);
 }
 
-jint Java_ej_microvg_VectorGraphicsNatives_loadImage(char *path, jint path_length, MICROVG_Image *res, jint *metadata) {
-	jint result = Java_ej_microvg_VectorGraphicsNatives_getImage(path, path_length, res, metadata);
-
-#if VG_FEATURE_RAW_EXTERNAL
-	if (LLVG_DATA_INVALID_PATH == result) {
-		// try to load a non-byte addressable image (copy in ui heap)
-		result = _load_external_image(path, true, res, metadata);
-	}
-#endif
-
-	return result;
+jint Java_ej_microvg_VectorGraphicsNatives_loadImage(char *path, jint path_length, MICROVG_Image *microvg_image) {
+	return _open_image(path, path_length, microvg_image, true);
 }
 
 jint VG_DRAWING_VGLITE_draw_image(draw_image_element drawer, const MICROVG_Image *res, const jfloat *drawing_matrix,
@@ -2757,20 +2881,24 @@ jint VG_DRAWING_VGLITE_draw_image(draw_image_element drawer, const MICROVG_Image
 
 jint Java_ej_microvg_VectorGraphicsNatives_createImage(MICROVG_Image *source, MICROVG_Image *dest,
                                                        const float color_matrix[]) {
-	LOG_MICROVG_IMAGE_START(create);
-
 	// cppcheck-suppress [misra-c2012-11.5] source is a vector image for sure
 	vector_image_t *image = (vector_image_t *)source->data;
 
 	// the source is a RAW image (in ROM or RAM) but not a BVI (see BufferedVectorImage.filterImage())
 	assert(!_is_image_bvi(image));
 
-	dest->data = (void *)LLUI_DISPLAY_IMPL_imageHeapAllocate(source->size);
+	// allocate the destination buffer
+	void *new_buffer = (void *)LLUI_DISPLAY_IMPL_imageHeapAllocate(source->size);
 	jint ret;
 
-	if (NULL != dest->data) {
-		(void)memcpy(dest->data, source->data, source->size);
-		dest->size = source->size;
+	if (NULL != new_buffer) {
+		// clone the image header and image buffer
+		(void)memcpy((void *)dest, (void *)source, sizeof(MICROVG_Image));
+		(void)memcpy(new_buffer, source->data, source->size);
+
+		// store new data
+		dest->data = new_buffer;
+		dest->flags |= FLAG_TYPE_HEAP;
 
 		// cppcheck-suppress [misra-c2012-11.5] destination is a vector image for sure
 		image = (vector_image_t *)dest->data;
@@ -2779,32 +2907,80 @@ jint Java_ej_microvg_VectorGraphicsNatives_createImage(MICROVG_Image *source, MI
 		_get_image_parameters(image, &drawing_data);
 		_derive_raw_image(&drawing_data, color_matrix);
 
+		int32_t registered = SNI_registerResource((void *)dest->data,
+		                                          (SNI_closeFunction) & _free_registered_image_in_heap,
+		                                          &_register_filtered_image_description);
+		assert(SNI_OK == registered);
+
 		ret = LLVG_SUCCESS;
 	} else {
 		ret = LLVG_OUT_OF_MEMORY;
 	}
 
-	LOG_MICROVG_IMAGE_END(create);
 	return ret;
 }
 
 void Java_ej_microvg_VectorGraphicsNatives_closeImage(MICROVG_Image *res) {
 	if (!VG_DRAWING_image_is_closed(res)) {
-		LOG_MICROVG_IMAGE_START(close);
+		switch (res->flags & FLAG_TYPE_MASK) {
+		default:
+		case FLAG_TYPE_DIRECT:
+		case FLAG_TYPE_BUILDER:
+			// nothing to do
+			break;
 
-		// cppcheck-suppress [misra-c2012-11.5] cast res->data as uint8_t* is allowed
-		if (_is_raw_image((uint8_t *)res->data)) {
-			// have to free to vector resource image data
+		case FLAG_TYPE_HEAP:
+		{
+			// have to unregister and remove the image from the image heap
+			int32_t unregistered = SNI_unregisterResource((void *)res->data,
+			                                              (SNI_closeFunction) & _free_registered_image_in_heap);
+			assert(SNI_OK == unregistered);
 			// cppcheck-suppress [misra-c2012-11.5] cast the resource in a u8 address
 			LLUI_DISPLAY_IMPL_imageHeapFree((uint8_t *)res->data);
+			break;
 		}
-		// else: it is an image allocated on the Java heap or in a BVI: nothing to free
 
-		LOG_MICROVG_IMAGE_END(close);
+#if defined VG_FEATURE_BUFFERED_VECTOR_IMAGE && (VG_FEATURE_BUFFERED_VECTOR_IMAGE == 1)
+		case FLAG_TYPE_BUFFERED:
+		{
+			// have to unregister and clear the linked list (also done in VG_BVI_NEMA_free_resources() via bi.close())
+			int32_t unregistered = SNI_unregisterResource((void *)res->data,
+			                                              (SNI_closeFunction) & _free_registered_buffered_image);
+			assert(SNI_OK == unregistered);
+			// cppcheck-suppress [misra-c2012-11.5] cast the resource in a vector_buffered_image_t
+			_bvi_clear_blocks((vector_buffered_image_t *)res->data);
+			break;
+		}
+#endif // #if defined VG_FEATURE_BUFFERED_VECTOR_IMAGE && (VG_FEATURE_BUFFERED_VECTOR_IMAGE == 1)
+		}
 
 		res->data = NULL;
 		res->size = 0;
 	}
+}
+
+// -----------------------------------------------------------------------------
+// TestResource functions
+// -----------------------------------------------------------------------------
+
+jlong Java_com_microej_microvg_test_TestResource_getSNICloseFunctionForFilteredImage(void) {
+	return (jlong) & _free_registered_image_in_heap;
+}
+
+jlong Java_com_microej_microvg_test_TestResource_getSNICloseFunctionForExternalImage(void) {
+#if VG_FEATURE_RAW_EXTERNAL
+	return (jlong) & _free_registered_image_in_heap;
+#else
+	return (jlong) - 1; // no meaning
+#endif // VG_FEATURE_RAW_EXTERNAL
+}
+
+jlong Java_com_microej_microvg_test_TestResource_getSNICloseFunctionForBufferedVectorImage(void) {
+#if defined VG_FEATURE_BUFFERED_VECTOR_IMAGE && (VG_FEATURE_BUFFERED_VECTOR_IMAGE == 1)
+	return (jlong) & _free_registered_buffered_image;
+#else
+	return (jlong) - 1; // no meaning
+#endif // #if defined VG_FEATURE_BUFFERED_VECTOR_IMAGE && (VG_FEATURE_BUFFERED_VECTOR_IMAGE == 1)
 }
 
 // -----------------------------------------------------------------------------

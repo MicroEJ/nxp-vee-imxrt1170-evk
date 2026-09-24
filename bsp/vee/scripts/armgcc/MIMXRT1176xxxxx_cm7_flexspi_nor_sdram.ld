@@ -271,9 +271,9 @@ SECTIONS
     __START_BSS = .;
     __bss_start__ = .;
     *(m_usb_dma_noninit_data)
-    __images_heap_start__ = .;
+    __images_heap_Start__ = .;
     *(.bss.microui.display.imagesHeap)
-    __images_heap_end__ = .;
+    __images_heap_End__ = .;
     *(.bss)
     *(.bss*)
     *(COMMON)

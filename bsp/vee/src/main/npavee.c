@@ -4,7 +4,7 @@
  *
  * SPDX-License-Identifier: BSD-3-Clause
  *
- * Copyright 2023-2025 MicroEJ Corp. All rights reserved.
+ * Copyright 2023-2026 MicroEJ Corp. All rights reserved.
  * Use of this source code is governed by a BSD-style license that can be found with this software.
  */
 
@@ -33,7 +33,7 @@
 #include "pin_mux.h"
 #include "lwip/sockets.h"
 
-#include "microej_main.h"
+#include "veeport_main.h"
 #include "sdcard_helper.h"
 #include <assert.h>
 #include "ksdk_mbedtls.h"
@@ -43,6 +43,11 @@
 
 #include "ecom_wifi_configuration.h"
 #include "LLKERNEL_RAM.h"
+
+#ifdef RUN_MICROEJ_CORE_VALIDATION
+#include "t_core_main.h"
+#include "t_llkernel_main.h"
+#endif // RUN_MICROEJ_CORE_VALIDATION
 
 /*******************************************************************************
  * Definitions
@@ -167,7 +172,10 @@ int main(void)
     BOARD_BootClockRUN();
     BOARD_ResetDisplayMix();
     BOARD_InitLpuartPins();
+#if !(defined(ENABLE_LPUART7) && ENABLE_LPUART7)
+    /* Pin conflict between LPUART7 and display */
     BOARD_InitMipiPanelPins();
+#endif
     BOARD_MIPIPanelTouch_I2C_Init();
     BOARD_InitDebugConsole();
     BOARD_InitPinsSDIO();
@@ -251,7 +259,18 @@ static void microej_task(void *pvParameters)
     LLKERNEL_RAM_BESTFIT_initialize((int32_t)&kernel_working_buffer[0], (int32_t)&kernel_working_buffer[KERNEL_WORKING_BUFFER_SIZE]);
 #endif // KERNEL_RAM_IMPL_BESTFIT
 
-    microej_main(0, NULL);
+#ifdef RUN_MICROEJ_CORE_VALIDATION
+    T_CORE_main();
+#endif // RUN_MICROEJ_CORE_VALIDATION
+
+#ifdef KERNEL_VALIDATION
+    T_LLKERNEL_main();
+#endif // KERNEL_VALIDATION
+
+    int result = veeport_main(0, NULL, NULL);
+    if (0 != result) {
+        PRINTF("veeport_main returned an error: %d\n", result);
+    }
     vTaskDelete(NULL);
 }
 

@@ -9,7 +9,7 @@
  * @file
  * @brief LLMJVM implementation over FreeRTOS.
  * @author MicroEJ Developer Team
- * @version 1.4.4
+ * @version 1.4.6
  */
 
 /*
@@ -217,7 +217,20 @@ int32_t LLMJVM_IMPL_wakeupVM(void) {
  * Clear the pending wake up flag and reset next wake up time
  */
 int32_t LLMJVM_IMPL_ackWakeup(void) {
-	return LLMJVM_OK;
+	int32_t result = LLMJVM_OK;
+
+	// Reset wake up time and cancel schedule request.
+	LLMJVM_FREERTOS_next_wake_up_time = INT64_MAX;
+	if (pdTRUE != xTimerStop(LLMJVM_FREERTOS_wake_up_timer, (TickType_t)0)) {
+		result = LLMJVM_ERROR;
+	} else {
+		// Block next call to idle.
+		if (pdTRUE != xSemaphoreTake(LLMJVM_FREERTOS_Semaphore, (TickType_t)0)) {
+			result = LLMJVM_ERROR;
+		}
+	}
+
+	return result;
 }
 
 /*

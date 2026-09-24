@@ -1,0 +1,203 @@
+The software contained in this package is licensed under the terms and conditions described in the `LICENSE.txt` file,
+except for the following files that are licensed under their own terms:
+
+----------------------------------------------------------------------
+   MicroUI
+----------------------------------------------------------------------
+
+Location: bsp/vee/middleware/microui
+License: MICROEJ COMMERCIAL SOFTWARE COMPONENT LICENSE AGREEMENT
+
+Copyright <beginYYYY>-<LastModifyYYYY> MicroEJ Corp. All rights reserved.
+MicroEJ Corp. PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
+
+The full license text is available at:
+bsp/vee/middleware/microui/LICENSE.txt
+
+----------------------------------------------------------------------
+   MicroVG
+----------------------------------------------------------------------
+
+Location: bsp/vee/middleware/microvg
+License: MICROEJ COMMERCIAL SOFTWARE COMPONENT LICENSE AGREEMENT
+
+Copyright <beginYYYY>-<LastModifyYYYY> MicroEJ Corp. All rights reserved.
+MicroEJ Corp. PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
+
+The full license text is available at:
+bsp/vee/middleware/microvg/LICENSE.txt
+
+----------------------------------------------------------------------
+   Coremark
+----------------------------------------------------------------------
+
+Location: bsp/vee/thirdparty/coremark/
+License: Dual License (COREMARK® ACCEPTABLE USE AGREEMENT | Apache License)
+
+Copyright <YYYY> Embedded Microprocessor Benchmark Consortium (EEMBC)
+
+The full license text is available at:
+bsp/vee/thirdparty/coremark/LICENSE.md
+
+----------------------------------------------------------------------
+   Embunit
+----------------------------------------------------------------------
+
+Location: bsp/vee/thirdparty/embunit/
+License: MIT
+
+Copyright (c) <YYYY> Embedded Unit Project
+
+The full license text is available at:
+bsp/vee/thirdparty/embunit/LICENSE
+
+----------------------------------------------------------------------
+   FreeType
+----------------------------------------------------------------------
+
+Location: bsp/vee/thirdparty/freetype/
+License: FTL
+
+Copyright (C) <beginYYYY>-<LastModifyYYYY> by David Turner, Robert Wilhelm, and Werner Lemberg.
+
+The full license text is available at:
+bsp/vee/thirdparty/freetype/docs/FTL.TXT
+
+----------------------------------------------------------------------
+   HarfBuzz
+----------------------------------------------------------------------
+
+Location: bsp/vee/thirdparty/harfbuzz/
+License: Old MIT
+
+Copyright © 2010-2022  Google, Inc.
+Copyright © 2015-2020  Ebrahim Byagowi
+Copyright © 2019,2020  Facebook, Inc.
+Copyright © 2012,2015  Mozilla Foundation
+Copyright © 2011  Codethink Limited
+Copyright © 2008,2010  Nokia Corporation and/or its subsidiary(-ies)
+Copyright © 2009  Keith Stribley
+Copyright © 2011  Martin Hosken and SIL International
+Copyright © 2007  Chris Wilson
+Copyright © 2005,2006,2020,2021,2022,2023  Behdad Esfahbod
+Copyright © 2004,2007,2008,2009,2010,2013,2021,2022,2023  Red Hat, Inc.
+Copyright © 1998-2005  David Turner and Werner Lemberg
+Copyright © 2016  Igalia S.L.
+Copyright © 2022  Matthias Clasen
+Copyright © 2018,2021  Khaled Hosny
+Copyright © 2018,2019,2020  Adobe, Inc
+Copyright © 2013-2015  Alexei Podtelezhnikov
+
+The full license text is available at:
+bsp/vee/thirdparty/harfbuzz/COPYING
+
+----------------------------------------------------------------------
+   SEGGER SystemView
+----------------------------------------------------------------------
+
+Location: bsp/vee/common/segger/
+License: SEGGER BSD
+
+/*********************************************************************
+*                SEGGER Microcontroller GmbH & Co. KG                *
+*                        The Embedded Experts                        *
+**********************************************************************
+*                                                                    *
+*       (c) 2015 - 2017  SEGGER Microcontroller GmbH & Co. KG        *
+*                                                                    *
+*       www.segger.com     Support: support@segger.com               *
+*                                                                    *
+**********************************************************************
+*                                                                    *
+*       SEGGER SystemView * Real-time application analysis           *
+*                                                                    *
+**********************************************************************
+*                                                                    *
+* All rights reserved.                                               *
+*                                                                    *
+* SEGGER strongly recommends to not make any changes                 *
+* to or modify the source code of this software in order to stay     *
+* compatible with the RTT protocol and J-Link.                       *
+*                                                                    *
+* Redistribution and use in source and binary forms, with or         *
+* without modification, are permitted provided that the following    *
+* conditions are met:                                                *
+*                                                                    *
+* o Redistributions of source code must retain the above copyright   *
+*   notice, this list of conditions and the following disclaimer.    *
+*                                                                    *
+* o Redistributions in binary form must reproduce the above          *
+*   copyright notice, this list of conditions and the following      *
+*   disclaimer in the documentation and/or other materials provided  *
+*   with the distribution.                                           *
+*                                                                    *
+* o Neither the name of SEGGER Microcontroller GmbH & Co. KG         *
+*   nor the names of its contributors may be used to endorse or      *
+*   promote products derived from this software without specific     *
+*   prior written permission.                                        *
+*                                                                    *
+* THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND             *
+* CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES,        *
+* INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF           *
+* MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE           *
+* DISCLAIMED. IN NO EVENT SHALL SEGGER Microcontroller BE LIABLE FOR *
+* ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR           *
+* CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT  *
+* OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS;    *
+* OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF      *
+* LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT          *
+* (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE  *
+* USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH   *
+* DAMAGE.                                                            *
+*                                                                    *
+**********************************************************************
+
+----------------------------------------------------------------------
+   VEE Port Essentials
+----------------------------------------------------------------------
+
+Location: bsp/vee/port/essentials/
+License: BSD-style license (same terms as the `LICENSE.txt` file)
+
+Copyright <beginYYYY>-<LastModifyYYYY> MicroEJ Corp. All rights reserved.
+
+The full license text is available at:
+bsp/vee/port/essentials/LICENSE.txt
+
+----------------------------------------------------------------------
+   VGLite
+----------------------------------------------------------------------
+
+Location: bsp/sdk_overlay/middleware/vglite/
+License: MIT
+
+Copyright <beginYYYY>-<LastModifyYYYY> Vivante Corporation, Santa Clara, California.
+
+The full license text is available at:
+bsp/sdk_overlay/middleware/vglite/LICENSE.txt
+
+----------------------------------------------------------------------
+   FreeRTOS Kernel
+----------------------------------------------------------------------
+
+Location: bsp/sdk_overlay/rtos/freertos/freertos-kernel/
+License: MIT
+
+Copyright (C) <beginYYYY>-<LastModifyYYYY> Amazon.com, Inc. or its affiliates. All Rights Reserved.
+
+The full license text is available at:
+bsp/sdk_overlay/rtos/freertos/freertos-kernel/LICENSE.md
+
+----------------------------------------------------------------------
+   MCUXpresso SDK
+----------------------------------------------------------------------
+
+Location: bsp/mcux-sdk/
+License: LA_OPT_NXP_Software_License
+
+The full license text is available at:
+bsp/mcux-sdk/core/LA_OPT_NXP_Software_License.txt
+
+Most of the mcux-sdk software components are open source and distributed under bsp/mcux-sdk/core/COPYING-BSD-3.
+For a complete overview of license details for all included content, please refer to bsp/mcux-sdk/core/SW-Content-Register.txt.
+

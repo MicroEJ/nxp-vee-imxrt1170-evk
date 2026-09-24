@@ -1,7 +1,7 @@
 /*
  * C
  *
- * Copyright 2023-2025 MicroEJ Corp. All rights reserved.
+ * Copyright 2023-2026 MicroEJ Corp.
  * Use of this source code is governed by a BSD-style license that can be found with this software.
  */
 
@@ -11,7 +11,7 @@
  * (in VGLite internal format).
  *
  * @author MicroEJ Developer Team
- * @version 9.0.1
+ * @version 10.0.1
  */
 
 #if !defined VG_BVI_VGLITE_H
@@ -22,7 +22,7 @@ extern "C" {
 #endif
 
 #include "vg_configuration.h"
-#if defined VG_FEATURE_BUFFERED_VECTOR_IMAGE
+#if defined VG_FEATURE_BUFFERED_VECTOR_IMAGE && (VG_FEATURE_BUFFERED_VECTOR_IMAGE == 1)
 
 // -----------------------------------------------------------------------------
 // Includes

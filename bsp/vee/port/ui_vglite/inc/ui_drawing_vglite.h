@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 MicroEJ Corp. All rights reserved.
+ * Copyright 2023-2025 MicroEJ Corp.
  * Use of this source code is governed by a BSD-style license that can be found with this software.
  */
 
@@ -16,7 +16,7 @@ extern "C" {
  * in the VEE port. When the drawing cannot be performed by the GPU, the software implementation
  * is used instead.
  * @author MicroEJ Developer Team
- * @version 10.0.0
+ * @version 11.0.0
  */
 
 // --------------------------------------------------------------------------------

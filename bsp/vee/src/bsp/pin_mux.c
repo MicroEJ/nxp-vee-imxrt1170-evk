@@ -345,8 +345,52 @@ void BOARD_InitLpuartPins(void) {
                                                  Open Drain Field: Disabled
                                                  Domain write protection: Both cores are allowed
                                                  Domain write protection lock: Neither of DWP bits is locked */
-}
 
+  IOMUXC_SetPinMux(
+      IOMUXC_GPIO_DISP_B2_10_LPUART2_TXD,     /* GPIO_DISP_B2_10 is configured as LPUART2_TXD */
+      0U);                                    /* Software Input On Field: Input Path is determined by functionality */
+  IOMUXC_SetPinMux(
+      IOMUXC_GPIO_DISP_B2_11_LPUART2_RXD,     /* GPIO_DISP_B2_11 is configured as LPUART2_RXD */
+      0U);                                    /* Software Input On Field: Input Path is determined by functionality */
+
+  // Pull UP on RX to prevent generating framing error when RX is not connected
+  IOMUXC_SetPinConfig(
+      IOMUXC_GPIO_DISP_B2_11_LPUART2_RXD,     /* GPIO_DISP_B2_11 PAD functional properties : */
+      0x0EU);                                 /* Slew Rate Field: Fast Slew Rate
+                                                 Drive Strength Field: high drive strength
+                                                 Pull / Keep Select Field: Pull Enable
+                                                 Pull Up / Down Config. Field: Weak pull up
+                                                 Open Drain Field: Disabled
+                                                 Domain write protection: Both cores are allowed
+                                                 Domain write protection lock: Neither of DWP bits is locked */
+
+#if defined(ENABLE_LPUART7) && ENABLE_LPUART7
+  IOMUXC_SetPinMux(
+      IOMUXC_GPIO_AD_00_LPUART7_TXD,          /* GPIO_AD_00 is configured as LPUART7_TXD */
+      0U);                                    /* Software Input On Field: Input Path is determined by functionality */
+  IOMUXC_SetPinMux(
+      IOMUXC_GPIO_AD_01_LPUART7_RXD,          /* GPIO_AD_01 is configured as LPUART7_RXD */
+      0U);                                    /* Software Input On Field: Input Path is determined by functionality */
+  IOMUXC_SetPinConfig(
+      IOMUXC_GPIO_AD_00_LPUART7_TXD,          /* GPIO_AD_00 PAD functional properties : */
+      0x0AU);                                 /* Slew Rate Field: Fast Slew Rate
+                                                 Drive Strength Field: high drive strength
+                                                 Pull / Keep Select Field: Pull Disable
+                                                 Pull Up / Down Config. Field: Weak pull up
+                                                 Open Drain Field: Disabled
+                                                 Domain write protection: Both cores are allowed
+                                                 Domain write protection lock: Neither of DWP bits is locked */
+  IOMUXC_SetPinConfig(
+      IOMUXC_GPIO_AD_01_LPUART7_RXD,          /* GPIO_AD_01 PAD functional properties : */
+      0x0EU);                                 /* Slew Rate Field: Fast Slew Rate
+                                                 Drive Strength Field: high drive strength
+                                                 Pull / Keep Select Field: Pull Enable
+                                                 Pull Up / Down Config. Field: Weak pull up
+                                                 Open Drain Field: Disabled
+                                                 Domain write protection: Both cores are allowed
+                                                 Domain write protection lock: Neither of DWP bits is locked */
+#endif
+}
 
 /*
  * TEXT BELOW IS USED AS SETTING FOR TOOLS *************************************

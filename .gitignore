@@ -1,11 +1,14 @@
 # Gradle 
 
 **/build/
+**/bin/
 **/.gradle/
 **/.idea/
 
 # BSP
 
+bsp/vee/port/essentials
+bsp/vee/thirdparty/coremark
 bsp/mcux-sdk
 bsp/vee/inc/
 bsp/vee/lib/

@@ -1,3 +1,5 @@
+# Copyright 2026 MicroEJ Corp. This file has been modified and/or created by MicroEJ Corp.
+
 # The west manifest file for rt1170 NXP VEE
 
 manifest:
@@ -8,6 +10,11 @@ manifest:
       url-base: https://github.com/FreeRTOS
     - name: NXP
       url-base: https://github.com/NXP
+    - name: eembc
+      url-base: https://github.com/eembc
+    - name: microej
+      url-base: https://github.com/MicroEJ
+  group-filter: [-optional]
   # Please add items below in reverse alphabetical order
   projects:
     - name: mcux-sdk
@@ -54,6 +61,14 @@ manifest:
       remote: nxp-mcuxpresso
       revision: MCUX_2.15.100
       path: nxpvee-mimxrt1170-evk/bsp/mcux-sdk/middleware/eiq
+    - name: coremark
+      remote: eembc
+      revision: main
+      path: nxpvee-mimxrt1170-evk/bsp/vee/thirdparty/coremark
+    - name: AbstractionLayer-Essentials
+      remote: microej
+      revision: 1.0.1
+      path: nxpvee-mimxrt1170-evk/bsp/vee/port/essentials
   self:
     path: nxpvee-mimxrt1170-evk
     west-commands: bsp/vee/scripts/west-commands.yml

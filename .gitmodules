@@ -1,0 +1,4 @@
+[submodule "bsp/cppcheck/scripts"]
+	path = bsp/cppcheck/scripts
+	url = git@gitlab.cross:M0113_Platformers/M0113_CPPCheck.git
+	branch = develop

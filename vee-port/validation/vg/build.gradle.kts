@@ -32,7 +32,6 @@ testing {
             dependencies {
                 implementation(project())
                 implementation(libs.junit)
-                implementation(libs.junit.platform)
 
                 implementation(libs.api.edc)
                 implementation(libs.api.bon)

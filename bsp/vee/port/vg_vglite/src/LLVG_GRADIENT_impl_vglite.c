@@ -1,7 +1,7 @@
 /*
  * C
  *
- * Copyright 2024-2025 MicroEJ Corp. All rights reserved.
+ * Copyright 2024-2026 MicroEJ Corp.
  * Use of this source code is governed by a BSD-style license that can be found with this software.
  */
 
@@ -9,12 +9,14 @@
  * @file
  * @brief MicroVG library low level API over VGLite.
  * @author MicroEJ Developer Team
- * @version 9.0.1
+ * @version 10.0.1
  */
 
 // -----------------------------------------------------------------------------
 // Includes
 // -----------------------------------------------------------------------------
+
+#include <string.h>
 
 #include <LLVG_GRADIENT_impl.h>
 
@@ -29,7 +31,9 @@
 // -----------------------------------------------------------------------------
 
 #if defined(VG_FEATURE_GRADIENT) && defined(VG_FEATURE_GRADIENT_FULL) && \
-	(VG_FEATURE_GRADIENT == VG_FEATURE_GRADIENT_FULL)
+	(VG_FEATURE_GRADIENT != VG_FEATURE_GRADIENT_FULL)
+#error "This implementation is only compatible with VG_FEATURE_GRADIENT_FULL"
+#endif
 
 // -----------------------------------------------------------------------------
 // Defines
@@ -69,18 +73,18 @@ jint LLVG_GRADIENT_IMPL_initializeGradient(jint *jgradient, jint length, const j
 		if (count < 2) {
 			// missing some colors: create a gradient to prevent unknown behavior at drawing time
 			// use same spec than image generator: use the same color for positions 0 and 1
-			jint color = count < 1 ? 0 /* fully transparent */ : colors[0];
+			jint color = (count < 1) ? 0 /* fully transparent */ : colors[0];
 			colors_addr[0] = color;
 			colors_addr[1] = color;
 			positions_addr[0] = 0u;
-			positions_addr[1] = (uint32_t)(VGLITE_GRADIENT_SIZE - 1);
+			positions_addr[1] = (VGLITE_GRADIENT_SIZE - 1u);
 		} else {
 			// fill colors
 			(void)memcpy(colors_addr, colors, count * sizeof(jint));
 
 			// fill positions
 			for (uint32_t p = 0; p < gradient->count; p++) {
-				positions_addr[p] = (uint32_t)(positions[p] * (VGLITE_GRADIENT_SIZE - 1));
+				positions_addr[p] = (positions[p] * (VGLITE_GRADIENT_SIZE - 1u));
 			}
 		}
 
@@ -95,6 +99,3 @@ jint LLVG_GRADIENT_IMPL_initializeGradient(jint *jgradient, jint length, const j
 // -----------------------------------------------------------------------------
 // EOF
 // -----------------------------------------------------------------------------
-
-#endif /* if defined(VG_FEATURE_GRADIENT) && defined(VG_FEATURE_GRADIENT_FULL) && (VG_FEATURE_GRADIENT ==
-        * VG_FEATURE_GRADIENT_FULL) */

@@ -21,250 +21,69 @@ Tests can be launched:
 
 ### Launcher Mode
 
+- Add the [core_test_natives.c](src/test/c/src/core_test_natives.c) file in your BSP and add it as a source file. These natives allow to test the FPU configuration and SNI native calling convention.
+- For a best result in the Java Round Robin test, disable all the C native tasks except the MicroEJ task.
 - Follow the configuration and execution steps described in VEE Port Test Suites [documentation](../README.md).
-
--  Before linking the application against the VEE Port, add the
-   following code in your BSP to test the FPU configuration and SNI native
-   calling convention:
-
-```c
-#include "sni.h"
-   
-jfloat Java_com_microej_core_tests_MicroejCoreValidation_testFloat(jfloat a, jfloat b){
-   return a * b;
-}
-
-jdouble Java_com_microej_core_tests_MicroejCoreValidation_testDouble(jdouble a, jdouble b){
-   return a * b;
-}
-
-jint Java_com_microej_core_tests_MicroejCoreValidation_testNativeArguments01(jint i1, jint i2, jint i3, jint i4, jint i5, jint i6, jint i7, jint i8, jint i9, jint i10){
-   if(i1==0x01020304 && 
-      i2==0x05060708 && 
-      i3==0x090A0B0C && 
-      i4==0x0D0E0F10 && 
-      i5==0x11121314 && 
-      i6==0x15161718 && 
-      i7==0x191A1B1C && 
-      i8==0x1D1E1F20 && 
-      i9==0x21222324 && 
-      i10==0x25262728){
-       return 0x292A2B2C;
-   }
-   else {
-       return 0;
-   }
-}
-
-jlong Java_com_microej_core_tests_MicroejCoreValidation_testNativeArguments02(jlong l1, jlong l2, jlong l3, jlong l4, jlong l5, jlong l6, jlong l7, jlong l8, jlong l9, jlong l10){
-   if(l1==0x2D2E2F3031323334ll && 
-      l2==0x35363738393A3B3Cll && 
-      l3==0x3D3E3F4041424344ll && 
-      l4==0x45464748494A4B4Cll && 
-      l5==0x4D4E4F5051525354ll && 
-      l6==0x55565758595A5B5Cll && 
-      l7==0x5D5E5F6061626364ll && 
-      l8==0x65666768696A6B6Cll && 
-      l9==0x6D6E6F7071727374ll && 
-      l10==0x75767778797A7B7Cll){
-       return 0x7D7E7F8081828384ll;
-   }
-   else {
-       return 0ll;
-   }
-}
-
-jlong Java_com_microej_core_tests_MicroejCoreValidation_testNativeArguments03(jint i1, jlong l2, jint i3, jlong l4, jint i5, jlong l6, jint i7, jlong l8, jint i9, jlong l10){
-   if(i1==0x85868788 && 
-      l2==0x898A8B8C8D8E8F90ll && 
-      i3==0x91929394 && 
-      l4==0x95969798999A9B9Cll && 
-      i5==0x9D9E9FA0 && 
-      l6==0xA1A2A3A4A5A6A7A8ll && 
-      i7==0xA9AAABAC && 
-      l8==0xADAEAFB0B1B2B3B4ll && 
-      i9==0xB5B6B7B8 && 
-      l10==0xB9BABBBCBDBEBFC0ll){
-       return 0xC1C2C3C4C5C6C7C8ll;
-   }
-   else {
-       return 0ll;
-   }
-}
-
-jfloat Java_com_microej_core_tests_MicroejCoreValidation_testNativeArguments04(jfloat f1, jfloat f2, jfloat f3, jfloat f4, jfloat f5, jfloat f6, jfloat f7, jfloat f8, jfloat f9, jfloat f10){
-   if(f1==1.0f && 
-      f2==1.1f && 
-      f3==1.2f && 
-      f4==1.3f && 
-      f5==1.4f && 
-      f6==1.5f && 
-      f7==1.6f && 
-      f8==1.7f && 
-      f9==1.8f && 
-      f10==1.9f){
-       return 2.0f;
-   }
-   else {
-       return 0.0f;
-   }
-}
-
-jdouble Java_com_microej_core_tests_MicroejCoreValidation_testNativeArguments05(jdouble d1, jdouble d2, jdouble d3, jdouble d4, jdouble d5, jdouble d6, jdouble d7, jdouble d8, jdouble d9, jdouble d10){
-   if(d1==2.0 && 
-      d2==2.1 && 
-      d3==2.2 && 
-      d4==2.3 && 
-      d5==2.4 && 
-      d6==2.5 && 
-      d7==2.6 && 
-      d8==2.7 && 
-      d9==2.8 && 
-      d10==2.9){
-       return 3.0;
-   }
-   else {
-       return 0.0;
-   }
-}
-
-jdouble Java_com_microej_core_tests_MicroejCoreValidation_testNativeArguments06(jfloat f1, jdouble d2, jfloat f3, jdouble d4, jfloat f5, jdouble d6, jfloat f7, jdouble d8, jfloat f9, jdouble d10){
-   if(f1==3.0f && 
-      d2==3.1 && 
-      f3==3.2f && 
-      d4==3.3 && 
-      f5==3.4f && 
-      d6==3.5 && 
-      f7==3.6f && 
-      d8==3.7 && 
-      f9==3.8f && 
-      d10==3.9){
-       return 4.0;
-   }
-   else {
-       return 0.0;
-   }
-}   
-
-jint Java_com_microej_core_tests_MicroejCoreValidation_sniSuspend(jlong timeout)
-{
-   return SNI_suspendCurrentJavaThread(timeout);
-}
-
-jint Java_com_microej_core_tests_MicroejCoreValidation_sniResume(jint threadID)
-{
-   return SNI_resumeJavaThread(threadID);
-}
-
-jint Java_com_microej_core_tests_MicroejCoreValidation_sniGetCurrentThreadID()
-{
-   return SNI_getCurrentJavaThreadID();
-}
-```
-
--  For a best result in the Java Round Robin test, disable all the C
-   native tasks except the MicroEJ task.
-
--  Once all the tests have passed successfully, MicroEJ Core is validated.
-
--  See below for an output example of a successful validation.
-
-```
-MicroEJ START
-*****************************************************************************************************
-*                                  MicroEJ Core Validation - 3.4.0                                  *
-*****************************************************************************************************
-* Copyright 2013-2024 MicroEJ Corp. All rights reserved.                                            *
-* Use of this source code is governed by a BSD-style license that can be found with this software.  *
-*****************************************************************************************************
-
--> Check visible clock (LLMJVM_IMPL_getCurrentTime validation)...
-Property 'com.microej.core.tests.max.allowed.clock.tick.duration.milliseconds' is not set (default to '20' millisecondss)
-Property 'com.microej.core.tests.clock.seconds' is not set (default to '10' seconds)
-1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-OK: testVisibleClock
--> Check schedule request and wakeup (LLMJVM_IMPL_scheduleRequest, LLMJVM_IMPL_wakeupVM, LLMJVM_IMPL_getCurrentTime, and LLMJVM_IMPL_getTimeNanos validation)...
-Property 'com.microej.core.tests.max.allowed.clock.tick.duration.milliseconds' is not set (default to '20' millisecondss)
-Waiting for 5s...
-...done
-OK: testTime
--> Check application time modification (LLMJVM_IMPL_getCurrentTime and LLMJVM_IMPL_setApplicationTime validation)...
-Property 'com.microej.core.tests.can.set.system.time' is not set (default to 'true')
-Set application time and wait for 5s...
-...done
-OK: testSetApplicationTime
--> Check Java round robin (LLMJVM_IMPL_scheduleRequest validation)...
-For a best result, please disable all the C native tasks except the MicroEJ task.
-Task 3 is waiting for start...
-Task 2 is waiting for start...
-Task 1 is waiting for start...
-Task 0 is waiting for start...
-Starting tasks and wait for 10 seconds...
-Task 2 ends.
-Task 3 ends.
-Task 0 ends.
-Task 1 ends.
-...done.
-OK: testJavaRoundRobin
-Main thread starts sleeping for 1s..
-WaitMaxTimeThread starts sleeping for `Long.MAX_VALUE` milliseconds
-Main thread woke up!
-OK: testScheduleMaxTime
--> Check isInReadOnlyMemory (LLBSP_IMPL_isInReadOnlyMemory validation)...
-Test synchronize on literal string
-Test synchronize on class
-Test multiple synchronize
-OK: testIsInReadOnlyMemory
--> Check FPU (soft/hard FP option)...
-OK: testFPU
--> Check floating-point arithmetic with NaN...
--> Check floating-point arithmetic with 0.0 and -0.0...
--> Check floating-point arithmetic with infinity...
--> Check floating-point arithmetic with min values...
--> Check floating-point division by 0.0...
--> Check floating-point Math functions...
--> Check floating-point NaN bit pattern...
--> Check integer arithmetic...
-OK: testFloatingPointArithmetic
--> Check floating-point parser...
-OK: testParseFloatingPoint
--> Check floating-point formatter...
-OK: testFormatFloatingPoint
--> Check parsing a string as a double ; in some systems such operations may allocate memory in the C heap (strtod, strtof, malloc implementation)...
-OK: testParseDoubleStringHeap
-Property 'com.microej.core.tests.monotonic.time.check.seconds' is not set (default to '60' seconds)
--> Check monotonic time consistency for 60 seconds (LLMJVM_IMPL_getCurrentTime)...
-.............................
-OK: testMonotonicTimeIncreases
--> Check current time clock tick duration (LLMJVM_IMPL_getCurrentTime, LLMJVM_IMPL_getTimeNanos)...
-Property 'com.microej.core.tests.max.allowed.clock.tick.duration.milliseconds' is not set (default to '20' millisecondss)
-Estimated LLMJVM_IMPL_getCurrentTime clock tick is 1 ms.
-Estimated LLMJVM_IMPL_getTimeNanos clock tick is lower than 4000 ns.
-OK: testSystemCurrentTimeClockTick
--> Check schedule request clock tick duration (LLMJVM_IMPL_scheduleRequest)...
-Property 'com.microej.core.tests.max.allowed.clock.tick.duration.milliseconds' is not set (default to '20' millisecondss)
-Estimated LLMJVM_IMPL_scheduleRequest clock tick is 1 ms.
-OK: testScheduleRequestClockTick
--> Check SNI native calling convention (ABI)...
-OK: testSniAbi
--> Check SNI atomic exchange implementation (LLBSP_IMPL_atomic_exchange)...
-OK: testSniAtomicExchange
-PASSED: 16
-MicroEJ END (exit code = 0)
-```
 
 ### VEE Port Test Suite Mode
 
 -  Follow the configuration and execution steps described in VEE Port Test Suites [documentation](../README.md).
+
+## Array Copy Performance Benchmark
+
+The `ArrayCopyPerformance` test measures `System.arraycopy()` throughput on large `byte[]` buffers and,
+optionally, asserts it against a minimum. On byte arrays `System.arraycopy()` resolves to a direct call
+into the C library copy routine, so its throughput depends on the libc and BSP configuration; a slow
+copy implementation shows up as a throughput drop. The test guards against such a regression.
+
+Four copies are measured and each is checked against its own threshold:
+
+- **aligned**: source and destination share the same word-aligned offset, in two distinct buffers;
+  its throughput drops if the BSP reverts to a byte-wise libc;
+- **misaligned**: the destination is shifted by one byte, in two distinct buffers; it additionally
+  drops if the BSP stops overriding `memmove` with a word-wide implementation;
+- **overlap right**: source and destination are in a single buffer with the destination one byte
+  above the source, which forces `memmove` to copy backwards to preserve the overlap;
+- **overlap left**: source and destination are in a single buffer with the destination one byte
+  below the source, which lets `memmove` copy forwards.
+
+The two overlapping copies also verify that `System.arraycopy()` is routed to `memmove` and not to a
+plain `memcpy`: a `memcpy` would corrupt the overlapping data and would not exhibit the
+direction-dependent behavior the overlap figures capture.
+
+When the buffers are larger than the CPU data cache and live in cacheable RAM, the copy is bounded by
+memory bandwidth rather than by the CPU, so the four copies reach essentially the same throughput and
+the thresholds guard against a bandwidth regression rather than a CPU-side alignment penalty. On a
+target without a data cache the copy is CPU-bound instead, and the aligned and misaligned figures may
+diverge.
+
+### Configuration
+
+The benchmark is configured through system properties, declared in
+[`validation/microej-testsuite-common.properties`](validation/microej-testsuite-common.properties) with
+the `microej.java.property.` prefix (for example
+`microej.java.property.com.microej.core.tests.arraycopy.min.throughput.mbps=125`).
+
+| Property | Default | Description |
+| --- | --- | --- |
+| `com.microej.core.tests.arraycopy.min.throughput.mbps` | unset (`0`) | Minimum expected **aligned** throughput, in MB/s. When unset, the aligned throughput is only logged and the check passes. |
+| `com.microej.core.tests.arraycopy.min.throughput.misaligned.mbps` | unset (`0`) | Minimum expected **misaligned** throughput, in MB/s. When unset, the misaligned throughput is only logged and the check passes. |
+| `com.microej.core.tests.arraycopy.min.throughput.overlap.right.mbps` | unset (`0`) | Minimum expected **overlap-right** throughput, in MB/s. When unset, the overlap-right throughput is only logged and the check passes. |
+| `com.microej.core.tests.arraycopy.min.throughput.overlap.left.mbps` | unset (`0`) | Minimum expected **overlap-left** throughput, in MB/s. When unset, the overlap-left throughput is only logged and the check passes. |
+| `com.microej.core.tests.arraycopy.buffer.size.bytes` | `65536` (64 KB) | Size of each of the **two** working buffers. The default already exceeds a typical MCU data cache; larger buffers do not change the measured throughput but need a proportionally larger Java heap. |
+
+To turn the benchmark into a regression guard on a given board:
+
+1. Run the test once with the thresholds unset and read the four measured throughput values from the logs.
+2. Set the four `min.throughput` properties to a value slightly below the observed baseline.
+3. Keep `arraycopy.buffer.size.bytes` large enough to exceed the CPU data cache so the measurement
+   reflects memory bandwidth. The test allocates two buffers of that size, so `core.memory.javaheap.size`
+   (in the same properties file) must hold both plus headroom — increase it together with the buffer size.
+
+The thresholds are regression floors only. To judge whether the port reaches the hardware's potential,
+compare the measured throughputs against the theoretical memory bandwidth the silicon vendor advertises
+for the backing memory (the RAM bandwidth figures in the datasheet or reference manual) and confirm the
+port reaches the expected fraction of that peak.
 
 ## Dependencies
 
@@ -295,3 +114,10 @@ N/A
 ## Restrictions
 
 None.
+
+---
+
+_Build: 7E4D1F7C_
+
+_Copyright 2026 MicroEJ Corp. All rights reserved._
+_Use of this source code is governed by a BSD-style license that can be found with this software._

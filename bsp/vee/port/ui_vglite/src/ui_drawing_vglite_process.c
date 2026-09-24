@@ -1,7 +1,7 @@
 /*
  * C
  *
- * Copyright 2019-2024 MicroEJ Corp. All rights reserved.
+ * Copyright 2019-2025 MicroEJ Corp.
  * Use of this source code is governed by a BSD-style license that can be found with this software.
  */
 
@@ -9,7 +9,7 @@
  * @file
  * @brief MicroEJ MicroUI library low level API: implementation of ui_drawing_vglite_process.h.
  * @author MicroEJ Developer Team
- * @version 10.0.0
+ * @version 11.0.0
  */
 
 // -----------------------------------------------------------------------------
@@ -178,13 +178,15 @@ static DRAWING_Status __draw_thick_shape_ellipse_arc(UI_DRAWING_VGLITE_PROCESS_d
  * @param[in] yRotation: Vertical coordinate of the rotation center
  * @param[in] angle: Angle that must be used to rotate the image
  * @param[in] alpha: The opacity level to apply while drawing the rotated image
+ * @param[in] blend: The blending mode
  * @param[in] filter: Quality of drawing.
  *
  * @return The drawing status.
  */
 static DRAWING_Status __rotate_image(UI_DRAWING_VGLITE_PROCESS_blit_rect_t drawer, MICROUI_GraphicsContext *gc,
                                      const MICROUI_Image *img, vg_lite_buffer_t *src, int x, int y, int xRotation,
-                                     int yRotation, float angle_deg, int alpha, vg_lite_filter_t filter);
+                                     int yRotation, float angle_deg, int alpha, vg_lite_blend_t blend,
+                                     vg_lite_filter_t filter);
 
 /*
  * @brief Scales an image using the GPU
@@ -197,13 +199,14 @@ static DRAWING_Status __rotate_image(UI_DRAWING_VGLITE_PROCESS_blit_rect_t drawe
  * @param[in] factorX: Horizontal scaling factor.
  * @param[in] yRotation: Vertical scaling factor.
  * @param[in] alpha: The opacity level to apply while drawing the image
+ * @param[in] blend: The blending mode
  * @param[in] filter: Quality of drawing.
  *
  * @return The drawing status.
  */
 static DRAWING_Status __scale_image(UI_DRAWING_VGLITE_PROCESS_blit_rect_t drawer, MICROUI_GraphicsContext *gc,
                                     const MICROUI_Image *img, vg_lite_buffer_t *src, int x, int y, float factorX,
-                                    float factorY, int alpha, vg_lite_filter_t filter);
+                                    float factorY, int alpha, vg_lite_blend_t blend, vg_lite_filter_t filter);
 
 // -----------------------------------------------------------------------------
 // Public functions
@@ -213,14 +216,17 @@ static DRAWING_Status __scale_image(UI_DRAWING_VGLITE_PROCESS_blit_rect_t drawer
 vg_lite_buffer_t * UI_DRAWING_VGLITE_PROCESS_prepare_draw_image(MICROUI_GraphicsContext *gc, MICROUI_Image *img,
                                                                 jint x_src, jint y_src, jint width, jint height,
                                                                 jint x_dest, jint y_dest, jint alpha,
-                                                                vg_lite_color_t *color, vg_lite_matrix_t *matrix,
-                                                                uint32_t *blit_rect) {
+                                                                vg_lite_blend_t *blend, vg_lite_color_t *color,
+                                                                vg_lite_matrix_t *matrix, uint32_t *blit_rect) {
 	vg_lite_buffer_t *ret;
 
-	if (UI_VGLITE_configure_source(&source_buffer, img) && UI_VGLITE_enable_vg_lite_scissor_region(gc, x_dest, y_dest,
-	                                                                                               x_dest + width - 1,
-	                                                                                               y_dest + height -
-	                                                                                               1)) {
+	if (UI_VGLITE_configure_source(&source_buffer, img, blend) && UI_VGLITE_enable_vg_lite_scissor_region(gc, x_dest,
+	                                                                                                      y_dest,
+	                                                                                                      x_dest +
+	                                                                                                      width - 1,
+	                                                                                                      y_dest +
+	                                                                                                      height -
+	                                                                                                      1)) {
 		*color = UI_VGLITE_get_vglite_color(gc, img, alpha);
 
 		vg_lite_identity(matrix);
@@ -630,7 +636,8 @@ DRAWING_Status UI_DRAWING_VGLITE_PROCESS_drawFlippedImage(UI_DRAWING_VGLITE_PROC
 	assert(0 == region_y);
 
 	DRAWING_Status ret;
-	*is_gpu_compatible = UI_VGLITE_configure_source(&source_buffer, img);
+	vg_lite_blend_t blend;
+	*is_gpu_compatible = UI_VGLITE_configure_source(&source_buffer, img, &blend);
 
 	if (*is_gpu_compatible) {
 		uint32_t dest_width = 0u;
@@ -716,7 +723,7 @@ DRAWING_Status UI_DRAWING_VGLITE_PROCESS_drawFlippedImage(UI_DRAWING_VGLITE_PROC
 			blit_rect[2] = img->width;
 			blit_rect[3] = img->height;
 
-			ret = (*drawer)(gc, &source_buffer, blit_rect, &matrix, VG_LITE_BLEND_SRC_OVER,
+			ret = (*drawer)(gc, &source_buffer, blit_rect, &matrix, blend,
 			                UI_VGLITE_get_vglite_color(gc, img, alpha), VG_LITE_FILTER_BI_LINEAR);
 		} else {
 			// no error: the drawing is just "out of clip"
@@ -737,12 +744,13 @@ DRAWING_Status UI_DRAWING_VGLITE_PROCESS_drawRotatedImageNearestNeighbor(UI_DRAW
                                                                          jint xRotation, jint yRotation, jfloat angle,
                                                                          jint alpha, bool *is_gpu_compatible) {
 	DRAWING_Status ret;
-	*is_gpu_compatible = UI_VGLITE_configure_source(&source_buffer, img);
+	vg_lite_blend_t blend;
+	*is_gpu_compatible = UI_VGLITE_configure_source(&source_buffer, img, &blend);
 
 	if (*is_gpu_compatible) {
 		// The GCNanoLiteV limitation: Same rendering around 90 degrees (89.0, 89.1 ... 90.9, 91)
 		// Render is acceptable since vglite 3.0.4-rev4
-		ret = __rotate_image(drawer, gc, img, &source_buffer, x, y, xRotation, yRotation, angle, alpha,
+		ret = __rotate_image(drawer, gc, img, &source_buffer, x, y, xRotation, yRotation, angle, alpha, blend,
 		                     VG_LITE_FILTER_POINT);
 	} else {
 		// no error: the drawing is just "not performed"
@@ -758,12 +766,13 @@ DRAWING_Status UI_DRAWING_VGLITE_PROCESS_drawRotatedImageBilinear(UI_DRAWING_VGL
                                                                   jint x, jint y, jint xRotation, jint yRotation,
                                                                   jfloat angle, jint alpha, bool *is_gpu_compatible) {
 	DRAWING_Status ret;
-	*is_gpu_compatible = UI_VGLITE_configure_source(&source_buffer, img);
+	vg_lite_blend_t blend;
+	*is_gpu_compatible = UI_VGLITE_configure_source(&source_buffer, img, &blend);
 
 	if (*is_gpu_compatible) {
 		// The GCNanoLiteV limitation: Same rendering around 90 degrees (89.0, 89.1 ... 90.9, 91)
 		// Render is acceptable since vglite 3.0.4-rev4
-		ret = __rotate_image(drawer, gc, img, &source_buffer, x, y, xRotation, yRotation, angle, alpha,
+		ret = __rotate_image(drawer, gc, img, &source_buffer, x, y, xRotation, yRotation, angle, alpha, blend,
 		                     VG_LITE_FILTER_BI_LINEAR);
 	} else {
 		// no error: the drawing is just "not performed"
@@ -779,10 +788,12 @@ DRAWING_Status UI_DRAWING_VGLITE_PROCESS_drawScaledImageNearestNeighbor(UI_DRAWI
                                                                         jint x, jint y, jfloat factorX, jfloat factorY,
                                                                         jint alpha, bool *is_gpu_compatible) {
 	DRAWING_Status ret;
-	*is_gpu_compatible = UI_VGLITE_configure_source(&source_buffer, img);
+	vg_lite_blend_t blend;
+	*is_gpu_compatible = UI_VGLITE_configure_source(&source_buffer, img, &blend);
 
 	if (*is_gpu_compatible) {
-		ret = __scale_image(drawer, gc, img, &source_buffer, x, y, factorX, factorY, alpha, VG_LITE_FILTER_POINT);
+		ret = __scale_image(drawer, gc, img, &source_buffer, x, y, factorX, factorY, alpha, blend,
+		                    VG_LITE_FILTER_POINT);
 	} else {
 		// no error: the drawing is just "not performed"
 		ret = DRAWING_DONE;
@@ -797,13 +808,14 @@ DRAWING_Status UI_DRAWING_VGLITE_PROCESS_drawScaledImageBilinear(UI_DRAWING_VGLI
                                                                  jint x, jint y, jfloat factorX, jfloat factorY,
                                                                  jint alpha, bool *is_gpu_compatible) {
 	DRAWING_Status ret;
-	*is_gpu_compatible = UI_VGLITE_configure_source(&source_buffer, img);
+	vg_lite_blend_t blend;
+	*is_gpu_compatible = UI_VGLITE_configure_source(&source_buffer, img, &blend);
 
 	if (*is_gpu_compatible) {
 		// when the factor is 1x1, the filter "point" draws something closer than draw_image
 		vg_lite_filter_t filter = ((1.0f == factorX) &&
 		                           (1.0f == factorY)) ? VG_LITE_FILTER_POINT : VG_LITE_FILTER_BI_LINEAR;
-		ret = __scale_image(drawer, gc, img, &source_buffer, x, y, factorX, factorY, alpha, filter);
+		ret = __scale_image(drawer, gc, img, &source_buffer, x, y, factorX, factorY, alpha, blend, filter);
 	} else {
 		// no error: the drawing is just "not performed"
 		ret = DRAWING_DONE;
@@ -1067,7 +1079,8 @@ static DRAWING_Status __draw_thick_shape_ellipse_arc(UI_DRAWING_VGLITE_PROCESS_d
 // See the section 'Internal function definitions' for the function documentation
 static DRAWING_Status __rotate_image(UI_DRAWING_VGLITE_PROCESS_blit_rect_t drawer, MICROUI_GraphicsContext *gc,
                                      const MICROUI_Image *img, vg_lite_buffer_t *src, int x, int y, int xRotation,
-                                     int yRotation, float angle_deg, int alpha, vg_lite_filter_t filter) {
+                                     int yRotation, float angle_deg, int alpha, vg_lite_blend_t blend,
+                                     vg_lite_filter_t filter) {
 	DRAWING_Status ret;
 
 	// Check if there is something to draw and clip drawing limits
@@ -1085,7 +1098,7 @@ static DRAWING_Status __rotate_image(UI_DRAWING_VGLITE_PROCESS_blit_rect_t drawe
 		blit_rect[2] = img->width;
 		blit_rect[3] = img->height;
 
-		ret = (*drawer)(gc, src, blit_rect, &matrix, VG_LITE_BLEND_SRC_OVER, UI_VGLITE_get_vglite_color(gc, img, alpha),
+		ret = (*drawer)(gc, src, blit_rect, &matrix, blend, UI_VGLITE_get_vglite_color(gc, img, alpha),
 		                filter);
 	} else {
 		ret = DRAWING_DONE;
@@ -1096,7 +1109,7 @@ static DRAWING_Status __rotate_image(UI_DRAWING_VGLITE_PROCESS_blit_rect_t drawe
 // See the section 'Internal function definitions' for the function documentation
 static DRAWING_Status __scale_image(UI_DRAWING_VGLITE_PROCESS_blit_rect_t drawer, MICROUI_GraphicsContext *gc,
                                     const MICROUI_Image *img, vg_lite_buffer_t *src, int x, int y, float factorX,
-                                    float factorY, int alpha, vg_lite_filter_t filter) {
+                                    float factorY, int alpha, vg_lite_blend_t blend, vg_lite_filter_t filter) {
 	DRAWING_Status ret;
 
 	// Check if there is something to draw and clip drawing limits
@@ -1113,7 +1126,7 @@ static DRAWING_Status __scale_image(UI_DRAWING_VGLITE_PROCESS_blit_rect_t drawer
 		blit_rect[2] = img->width;
 		blit_rect[3] = img->height;
 
-		ret = (*drawer)(gc, src, blit_rect, &matrix, VG_LITE_BLEND_SRC_OVER, UI_VGLITE_get_vglite_color(gc, img, alpha),
+		ret = (*drawer)(gc, src, blit_rect, &matrix, blend, UI_VGLITE_get_vglite_color(gc, img, alpha),
 		                filter);
 	} else {
 		ret = DRAWING_DONE;

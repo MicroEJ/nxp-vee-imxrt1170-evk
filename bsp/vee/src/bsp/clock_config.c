@@ -600,9 +600,9 @@ void BOARD_BootClockRUN(void)
     rootCfg.div = 1;
     CLOCK_SetRootClock(kCLOCK_Root_Lpuart6, &rootCfg);
 
-    /* Configure LPUART7 using OSC_RC_48M_DIV2 */
-    rootCfg.mux = kCLOCK_LPUART7_ClockRoot_MuxOscRc48MDiv2;
-    rootCfg.div = 1;
+    /* Configure LPUART7 using SYS_PLL2_CLK */
+    rootCfg.mux = kCLOCK_LPUART7_ClockRoot_MuxSysPll2Out;
+    rootCfg.div = 22;
     CLOCK_SetRootClock(kCLOCK_Root_Lpuart7, &rootCfg);
 
     /* Configure LPUART8 using OSC_RC_48M_DIV2 */
@@ -1413,9 +1413,9 @@ void BOARD_BootClockRUN_800M(void)
     rootCfg.div = 1;
     CLOCK_SetRootClock(kCLOCK_Root_Lpuart6, &rootCfg);
 
-    /* Configure LPUART7 using OSC_RC_48M_DIV2 */
-    rootCfg.mux = kCLOCK_LPUART7_ClockRoot_MuxOscRc48MDiv2;
-    rootCfg.div = 1;
+    /* Configure LPUART7 using SYS_PLL2_CLK */
+    rootCfg.mux = kCLOCK_LPUART7_ClockRoot_MuxSysPll2Out;
+    rootCfg.div = 22;
     CLOCK_SetRootClock(kCLOCK_Root_Lpuart7, &rootCfg);
 
     /* Configure LPUART8 using OSC_RC_48M_DIV2 */

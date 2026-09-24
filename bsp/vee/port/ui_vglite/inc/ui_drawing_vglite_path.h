@@ -1,7 +1,7 @@
 /*
  * C
  *
- * Copyright 2019-2024 MicroEJ Corp. All rights reserved.
+ * Copyright 2019-2025 MicroEJ Corp.
  * Use of this source code is governed by a BSD-style license that can be found with this software.
  */
 
@@ -10,7 +10,7 @@
  * @brief MicroEJ MicroUI library low level API: implementation over VGLite. Provides
  * a set of defines and functions to compute some shapes in VGLite paths.
  * @author MicroEJ Developer Team
- * @version 10.0.0
+ * @version 11.0.0
  */
 
 #if !defined UI_DRAWING_VGLITE_PATH_H

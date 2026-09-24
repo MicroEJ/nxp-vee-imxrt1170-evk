@@ -14,6 +14,14 @@ BSP_DECLARE_BUFFER(images_heap)
 
 #define CACHE_LINESIZE_BYTE FSL_FEATURE_L1DCACHE_LINESIZE_BYTE
 
+/*
+ * @brief Flag that identifies a drawing made in software (by the CPU, not the GPU)
+ */
+#define FLAG_SOFTWARE_DRAWING ((uint8_t)0x1)
+
+
+extern uint8_t LLUI_DISPLAY_testAndSetUserFlag(MICROUI_GraphicsContext *gc, uint8_t mask, bool set);
+
 static MICROUI_GraphicsContext *previous_gc;
 
 static bool image_is_in_image_heap(MICROUI_Image *image)
@@ -77,7 +85,7 @@ void UI_VGLITE_IMPL_notify_gpu_start(MICROUI_GraphicsContext *gc)
 	previous_gc = gc;
 	get_image_and_clip(gc, &image, &clip);
 
-	if (image_is_in_image_heap(image)) {
+	if (image_is_in_image_heap(image) && LLUI_DISPLAY_testAndSetUserFlag(gc, FLAG_SOFTWARE_DRAWING, false)) {
 		// Flush the cache to make new changes available to GPU
 		L1CACHE_CleanDCacheByRange(
 			(get_clip_address(image, clip) / CACHE_LINESIZE_BYTE) * CACHE_LINESIZE_BYTE,
@@ -98,4 +106,18 @@ void UI_VGLITE_IMPL_notify_gpu_stop(MICROUI_GraphicsContext *gc)
 			(get_clip_address(image, clip) / CACHE_LINESIZE_BYTE) * CACHE_LINESIZE_BYTE,
 			(get_clip_size(image, clip) / CACHE_LINESIZE_BYTE + 1) * CACHE_LINESIZE_BYTE);
 	}
+}
+
+
+// --------------------------------------------------------------------------------
+// LLUI_DISPLAY_impl hidden functions (UI Pack 14.4.2)
+// --------------------------------------------------------------------------------
+
+/*
+ * @brief Hidden function of the UI Pack 14.4.2: called by the Graphics Engine when a drawing is rendered by a software
+ * algorithm (CPU drawing).
+ */
+void LLUI_DISPLAY_IMPL_notifyDrawingSoft(MICROUI_GraphicsContext *gc) {
+	// tags the drawing (don't care about old mask)
+	(void)LLUI_DISPLAY_testAndSetUserFlag(gc, FLAG_SOFTWARE_DRAWING, true);
 }

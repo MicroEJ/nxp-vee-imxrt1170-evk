@@ -1,5 +1,5 @@
 /*
- * Copyright 2023-2024 MicroEJ Corp. All rights reserved.
+ * Copyright 2023-2025 MicroEJ Corp.
  * Use of this source code is governed by a BSD-style license that can be found with this software.
  */
 
@@ -16,7 +16,7 @@ extern "C" {
  * are converted to VGLite objects and then a drawing function is called to render the
  * drawing.
  * @author MicroEJ Developer Team
- * @version 10.0.0
+ * @version 11.0.0
  */
 
 // --------------------------------------------------------------------------------
@@ -88,8 +88,8 @@ typedef DRAWING_Status (* UI_DRAWING_VGLITE_PROCESS_clear_t)(MICROUI_GraphicsCon
 vg_lite_buffer_t * UI_DRAWING_VGLITE_PROCESS_prepare_draw_image(MICROUI_GraphicsContext *gc, MICROUI_Image *img,
                                                                 jint x_src, jint y_src, jint width, jint height,
                                                                 jint x_dest, jint y_dest, jint alpha,
-                                                                vg_lite_color_t *color, vg_lite_matrix_t *matrix,
-                                                                uint32_t *blit_rect);
+                                                                vg_lite_blend_t *blend, vg_lite_color_t *color,
+                                                                vg_lite_matrix_t *matrix, uint32_t *blit_rect);
 
 /*
  * @brief Implementation of drawLine over VGLite. See ui_drawing.h
